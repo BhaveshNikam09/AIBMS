@@ -216,3 +216,8 @@ __marimo__/
 
 # Streamlit
 .streamlit/secrets.toml
+<<<<<<< HEAD
+=======
+
+./venv
+>>>>>>> 17334e3 (project done)

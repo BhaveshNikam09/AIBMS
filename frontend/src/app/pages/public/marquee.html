@@ -1,0 +1,840 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>AIBMS — Continuous Flow</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,700;12..96,800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet"/>
+<style>
+
+/* ═══════════════════════════════════════════════
+   RESET & BASE
+═══════════════════════════════════════════════ */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+body {
+  font-family: 'DM Sans', sans-serif;
+  background: #05060f;
+  color: #fff;
+  -webkit-font-smoothing: antialiased;
+  overflow-x: hidden;
+}
+
+/* ═══════════════════════════════════════════════
+   TOKENS
+═══════════════════════════════════════════════ */
+:root {
+  --blue:   #4C6EF5;
+  --violet: #7C3AED;
+  --purple: #9333EA;
+  --pink:   #EC4899;
+  --cyan:   #06B6D4;
+  --teal:   #0D9488;
+  --amber:  #F59E0B;
+  --rose:   #F43F5E;
+
+  --ease-out: cubic-bezier(.25, 1, .5, 1);
+}
+
+/* ═══════════════════════════════════════════════
+   SECTION SHELL
+═══════════════════════════════════════════════ */
+.flow-section {
+  position: relative;
+  padding: 120px 0 130px;
+  overflow: hidden;
+  isolation: isolate;
+}
+
+/* ── Deep layered background ── */
+.flow-bg {
+  position: absolute; inset: 0; z-index: 0; pointer-events: none;
+  background:
+    radial-gradient(ellipse 80% 60% at  0% 50%, rgba(76,110,245,.12) 0%, transparent 55%),
+    radial-gradient(ellipse 60% 70% at 100% 30%, rgba(147,51,234,.10) 0%, transparent 55%),
+    radial-gradient(ellipse 55% 55% at  50% 100%, rgba(236,72,153,.08) 0%, transparent 50%),
+    radial-gradient(ellipse 45% 40% at  70% 10%, rgba(6,182,212,.07)  0%, transparent 50%);
+  animation: bg-shift 18s ease-in-out infinite alternate;
+}
+@keyframes bg-shift {
+  0%   { opacity:.8; filter:hue-rotate(0deg); }
+  100% { opacity:1;  filter:hue-rotate(12deg); }
+}
+
+/* Parallax layer 1 — slow drifting orbs (moves opposite scroll direction via JS) */
+.flow-parallax-slow {
+  position: absolute; inset: 0; z-index: 1; pointer-events: none;
+  will-change: transform;
+}
+.par-orb {
+  position: absolute; border-radius: 50%; filter: blur(70px);
+}
+.po1 { width:480px;height:480px; top:-80px; left:-100px;
+       background:radial-gradient(circle,rgba(76,110,245,.18),transparent 65%);
+       animation: orb-drift1 22s ease-in-out infinite alternate; }
+.po2 { width:380px;height:380px; bottom:-60px; right:-80px;
+       background:radial-gradient(circle,rgba(147,51,234,.14),transparent 65%);
+       animation: orb-drift2 28s ease-in-out infinite alternate; }
+.po3 { width:320px;height:320px; top:30%; left:40%;
+       background:radial-gradient(circle,rgba(236,72,153,.10),transparent 65%);
+       animation: orb-drift3 20s ease-in-out infinite alternate; }
+@keyframes orb-drift1{ 0%{transform:translate(0,0)} 100%{transform:translate(60px,80px)} }
+@keyframes orb-drift2{ 0%{transform:translate(0,0)} 100%{transform:translate(-50px,-60px)} }
+@keyframes orb-drift3{ 0%{transform:translate(0,0)} 100%{transform:translate(40px,-50px)} }
+
+/* Fine grid */
+.flow-grid {
+  position: absolute; inset: 0; z-index: 1; pointer-events: none;
+  background-image:
+    linear-gradient(rgba(255,255,255,.028) 1px, transparent 1px),
+    linear-gradient(90deg,rgba(255,255,255,.028) 1px, transparent 1px);
+  background-size: 80px 80px;
+  mask-image: radial-gradient(ellipse 100% 80% at 50% 50%, black 10%, transparent 80%);
+}
+
+/* Top / bottom gradient fade */
+.flow-fade-top,
+.flow-fade-bot {
+  position: absolute; left: 0; right: 0; height: 160px; z-index: 10; pointer-events: none;
+}
+.flow-fade-top { top: 0;
+  background: linear-gradient(to bottom, #05060f 0%, rgba(5,6,15,.6) 50%, transparent 100%); }
+.flow-fade-bot { bottom: 0;
+  background: linear-gradient(to top,   #05060f 0%, rgba(5,6,15,.6) 50%, transparent 100%); }
+
+/* Left / right masks so cards vanish softly at edges */
+.flow-mask-left,
+.flow-mask-right {
+  position: absolute; top: 0; bottom: 0; width: 220px; z-index: 9; pointer-events: none;
+}
+.flow-mask-left  { left:  0; background: linear-gradient(to right, #05060f 0%, transparent 100%); }
+.flow-mask-right { right: 0; background: linear-gradient(to left,  #05060f 0%, transparent 100%); }
+
+/* ═══════════════════════════════════════════════
+   HEADER
+═══════════════════════════════════════════════ */
+.flow-header {
+  position: relative; z-index: 5;
+  text-align: center;
+  padding: 0 24px;
+  margin-bottom: 64px;
+}
+.flow-eyebrow {
+  display: inline-flex; align-items: center; gap: 10px;
+  font-size: .7rem; font-weight: 600; text-transform: uppercase;
+  letter-spacing: .15em; color: rgba(255,255,255,.38);
+  margin-bottom: 16px;
+}
+.flow-eyebrow-line {
+  width: 24px; height: 1.5px; border-radius: 2px;
+  background: linear-gradient(90deg,#4C6EF5,#9333EA);
+  opacity: .7;
+}
+.flow-title {
+  font-family: 'Bricolage Grotesque', sans-serif;
+  font-size: clamp(1.9rem, 3.8vw, 3rem);
+  font-weight: 800; letter-spacing: -.04em; line-height: 1.12;
+  color: #fff; margin-bottom: 14px;
+}
+.flow-title .gt {
+  background: linear-gradient(135deg, #a5c8ff 0%, #d4b5ff 50%, #fca5c8 100%);
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+  background-clip: text;
+  filter: drop-shadow(0 0 18px rgba(147,51,234,.4));
+}
+.flow-sub {
+  font-size: .96rem; font-weight: 300;
+  color: rgba(255,255,255,.48); max-width: 480px; margin: 0 auto;
+  line-height: 1.7;
+}
+
+/* ═══════════════════════════════════════════════
+   LANES WRAPPER
+═══════════════════════════════════════════════ */
+.flow-lanes {
+  position: relative; z-index: 5;
+  display: flex; flex-direction: column; gap: 18px;
+}
+
+/* ═══════════════════════════════════════════════
+   SINGLE LANE (one scrolling row)
+═══════════════════════════════════════════════ */
+.flow-lane {
+  overflow: hidden;
+  /* pause any child animation when lane is hovered */
+}
+/* The track — position driven entirely by JS rAF, no CSS animation */
+.flow-track {
+  display: flex; gap: 16px;
+  width: max-content;
+  will-change: transform;
+  /* No animation property — JS owns the transform */
+}
+
+/* ═══════════════════════════════════════════════
+   CARD BASE
+═══════════════════════════════════════════════ */
+.fc {
+  flex-shrink: 0;
+  display: flex; align-items: flex-start; gap: 14px;
+  padding: 18px 22px;
+  border-radius: 16px;
+  border: 1px solid rgba(255,255,255,.09);
+  background: rgba(12, 9, 28, .72);
+  /* NO backdrop-filter on the card itself — it causes blur */
+  box-shadow:
+    0 0 0 1px rgba(255,255,255,.04),
+    0 8px 28px rgba(0,0,0,.45),
+    inset 0 1px 0 rgba(255,255,255,.06);
+  cursor: default;
+  position: relative; overflow: hidden;
+  /* smooth hover */
+  transition:
+    transform    .42s cubic-bezier(.34,1.4,.64,1),
+    border-color .35s var(--ease-out),
+    box-shadow   .35s var(--ease-out);
+  min-width: 260px;
+}
+
+/* Specular top-left highlight */
+.fc::before {
+  content: ''; position: absolute;
+  top: 0; left: 0; width: 55%; height: 45%;
+  background: radial-gradient(ellipse at 15% 15%, rgba(255,255,255,.055) 0%, transparent 65%);
+  border-radius: 16px 0 0 0;
+  pointer-events: none;
+}
+
+/* Bottom accent shimmer line */
+.fc::after {
+  content: ''; position: absolute;
+  bottom: 0; left: 20%; right: 20%; height: 1px;
+  background: var(--card-line, linear-gradient(90deg,transparent,rgba(147,51,234,.5),transparent));
+  opacity: 0;
+  transition: opacity .35s var(--ease-out);
+}
+
+/* Hover state */
+.fc:hover {
+  transform: translateY(-5px) scale(1.025);
+  border-color: rgba(255,255,255,.18);
+  box-shadow:
+    0 0 0 1px rgba(255,255,255,.08),
+    0 20px 48px rgba(0,0,0,.55),
+    0 0 32px var(--card-glow, rgba(147,51,234,.18)),
+    inset 0 1px 0 rgba(255,255,255,.09);
+}
+.fc:hover::after { opacity: 1; }
+
+/* ─ Card icon ─ */
+.fc-icon {
+  width: 40px; height: 40px; min-width: 40px;
+  border-radius: 11px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1.1rem;
+  border: 1px solid rgba(255,255,255,.08);
+  position: relative; z-index: 1;
+  flex-shrink: 0;
+  transition: transform .42s cubic-bezier(.34,1.4,.64,1);
+}
+.fc:hover .fc-icon { transform: scale(1.1) rotate(-4deg); }
+
+/* ─ Card text ─ */
+.fc-text { position: relative; z-index: 1; }
+.fc-name {
+  font-family: 'Bricolage Grotesque', sans-serif;
+  font-size: .88rem; font-weight: 700;
+  letter-spacing: -.015em; color: #fff;
+  margin-bottom: 4px; line-height: 1.2;
+}
+.fc-desc {
+  font-size: .76rem; font-weight: 300;
+  color: rgba(255,255,255,.45); line-height: 1.5;
+}
+
+/* ─ Stat variant ─ */
+.fc.stat {
+  flex-direction: column; gap: 6px;
+  min-width: 180px; padding: 20px 22px;
+}
+.fc-stat-num {
+  font-family: 'Bricolage Grotesque', sans-serif;
+  font-size: 1.75rem; font-weight: 800;
+  letter-spacing: -.04em; line-height: 1;
+  background: var(--num-grad, linear-gradient(135deg,#a5c8ff,#d4b5ff));
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+.fc-stat-label {
+  font-size: .72rem; color: rgba(255,255,255,.42); font-weight: 400; line-height: 1.4;
+}
+
+/* ─ Quote variant ─ */
+.fc.quote {
+  flex-direction: column; gap: 10px; min-width: 300px;
+  padding: 20px 22px;
+}
+.fc-quote-text {
+  font-size: .82rem; font-style: italic; font-weight: 300;
+  color: rgba(255,255,255,.62); line-height: 1.55;
+}
+.fc-quote-author {
+  display: flex; align-items: center; gap: 9px; margin-top: 2px;
+}
+.fc-avatar {
+  width: 26px; height: 26px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: .6rem; font-weight: 800;
+  border: 1px solid rgba(255,255,255,.12);
+}
+.fc-author-name { font-size: .72rem; font-weight: 600; color: rgba(255,255,255,.65); }
+.fc-author-role { font-size: .64rem; color: rgba(255,255,255,.32); margin-top: 1px; }
+
+/* ─ Tag/pill variant ─ */
+.fc.pill-card {
+  align-items: center; gap: 10px;
+  padding: 14px 20px;
+  min-width: auto;
+}
+.fc-pill-icon { font-size: 1.2rem; line-height: 1; }
+.fc-pill-label {
+  font-size: .84rem; font-weight: 600;
+  color: rgba(255,255,255,.72); letter-spacing: -.01em;
+  white-space: nowrap;
+}
+
+/* ─ Per-card colour themes ─ */
+.c-blue   { --card-glow:rgba(76,110,245,.22);  --card-line:linear-gradient(90deg,transparent,rgba(76,110,245,.6),transparent); }
+.c-violet { --card-glow:rgba(124,58,237,.22);  --card-line:linear-gradient(90deg,transparent,rgba(124,58,237,.6),transparent); }
+.c-purple { --card-glow:rgba(147,51,234,.22);  --card-line:linear-gradient(90deg,transparent,rgba(147,51,234,.6),transparent); }
+.c-pink   { --card-glow:rgba(236,72,153,.2);   --card-line:linear-gradient(90deg,transparent,rgba(236,72,153,.6),transparent); }
+.c-cyan   { --card-glow:rgba(6,182,212,.2);    --card-line:linear-gradient(90deg,transparent,rgba(6,182,212,.6),transparent); }
+.c-teal   { --card-glow:rgba(13,148,136,.2);   --card-line:linear-gradient(90deg,transparent,rgba(13,148,136,.6),transparent); }
+.c-amber  { --card-glow:rgba(245,158,11,.18);  --card-line:linear-gradient(90deg,transparent,rgba(245,158,11,.5),transparent); }
+.c-rose   { --card-glow:rgba(244,63,94,.2);    --card-line:linear-gradient(90deg,transparent,rgba(244,63,94,.55),transparent); }
+.c-emerald{ --card-glow:rgba(16,185,129,.2);   --card-line:linear-gradient(90deg,transparent,rgba(16,185,129,.55),transparent); }
+
+/* Icon backgrounds */
+.ib-blue   { background:rgba(76,110,245,.14);  }
+.ib-violet { background:rgba(124,58,237,.14);  }
+.ib-purple { background:rgba(147,51,234,.14);  }
+.ib-pink   { background:rgba(236,72,153,.12);  }
+.ib-cyan   { background:rgba(6,182,212,.12);   }
+.ib-teal   { background:rgba(13,148,136,.12);  }
+.ib-amber  { background:rgba(245,158,11,.12);  }
+.ib-rose   { background:rgba(244,63,94,.12);   }
+.ib-emerald{ background:rgba(16,185,129,.12);  }
+
+/* ═══════════════════════════════════════════════
+   SCROLL REVEAL for header
+═══════════════════════════════════════════════ */
+.reveal {
+  opacity: 0; transform: translateY(24px);
+  transition: opacity .7s var(--ease-out), transform .7s var(--ease-out);
+}
+.reveal.vis { opacity: 1; transform: none; }
+.reveal.d1 { transition-delay: .08s; }
+.reveal.d2 { transition-delay: .16s; }
+
+</style>
+</head>
+<body>
+
+<!-- ═══════════════════════════════════════════════════════
+     CONTINUOUS FLOW SECTION
+═══════════════════════════════════════════════════════ -->
+<section class="flow-section" id="flow">
+
+  <!-- Background layers -->
+  <div class="flow-bg"></div>
+  <div class="flow-parallax-slow">
+    <div class="par-orb po1"></div>
+    <div class="par-orb po2"></div>
+    <div class="par-orb po3"></div>
+  </div>
+  <div class="flow-grid"></div>
+  <div class="flow-fade-top"></div>
+  <div class="flow-fade-bot"></div>
+  <div class="flow-mask-left"></div>
+  <div class="flow-mask-right"></div>
+
+  <!-- Header -->
+  <div class="flow-header">
+    <div class="flow-eyebrow reveal">
+      <span class="flow-eyebrow-line"></span>
+      Everything you need
+      <span class="flow-eyebrow-line"></span>
+    </div>
+    <h2 class="flow-title reveal d1">
+      Built for every layer<br/>of <span class="gt">your business</span>
+    </h2>
+    <p class="flow-sub reveal d2">
+      AIBMS replaces your scattered stack with one AI-native layer — automation, intelligence, and action, unified.
+    </p>
+  </div>
+
+  <!-- ═══ LANES ═══ -->
+  <div class="flow-lanes">
+
+    <!-- ── LANE 1: Features → moving left, normal speed ── -->
+    <div class="flow-lane" id="lane1">
+      <div class="flow-track" data-dir="-1" data-speed="0.22">
+
+        <!-- Original set -->
+        <div class="fc c-blue">
+          <div class="fc-icon ib-blue">⚡</div>
+          <div class="fc-text"><div class="fc-name">Workflow Automation</div><div class="fc-desc">300+ integrations, zero-code, AI-triggered actions</div></div>
+        </div>
+        <div class="fc c-violet">
+          <div class="fc-icon ib-violet">🎯</div>
+          <div class="fc-text"><div class="fc-name">Lead Scoring AI</div><div class="fc-desc">Score every lead 0–100 using real-time signals</div></div>
+        </div>
+        <div class="fc c-cyan">
+          <div class="fc-icon ib-cyan">📊</div>
+          <div class="fc-text"><div class="fc-name">Live Dashboard</div><div class="fc-desc">Every KPI in one glanceable, AI-summarised view</div></div>
+        </div>
+        <div class="fc c-pink">
+          <div class="fc-icon ib-pink">💬</div>
+          <div class="fc-text"><div class="fc-name">AI Chatbot</div><div class="fc-desc">Query CRM, trigger automations, get answers instantly</div></div>
+        </div>
+        <div class="fc c-teal">
+          <div class="fc-icon ib-teal">🛡</div>
+          <div class="fc-text"><div class="fc-name">SOC2 Security</div><div class="fc-desc">Enterprise-grade, end-to-end encrypted by default</div></div>
+        </div>
+        <div class="fc c-amber">
+          <div class="fc-icon ib-amber">🔮</div>
+          <div class="fc-text"><div class="fc-name">Revenue Forecast</div><div class="fc-desc">AI predicts Q4 close rates with confidence intervals</div></div>
+        </div>
+        <div class="fc c-purple">
+          <div class="fc-icon ib-purple">🎙️</div>
+          <div class="fc-text"><div class="fc-name">Voice Agent</div><div class="fc-desc">Run full BMS workflows hands-free, under 300ms latency</div></div>
+        </div>
+        <div class="fc c-rose">
+          <div class="fc-icon ib-rose">⚠️</div>
+          <div class="fc-text"><div class="fc-name">Anomaly Detection</div><div class="fc-desc">Flags revenue risk before it hits your bottom line</div></div>
+        </div>
+        <div class="fc c-emerald">
+          <div class="fc-icon ib-emerald">🤝</div>
+          <div class="fc-text"><div class="fc-name">Team Collaboration</div><div class="fc-desc">Shared dashboards, AI-assisted threads, real-time alerts</div></div>
+        </div>
+        <div class="fc c-blue">
+          <div class="fc-icon ib-blue">📋</div>
+          <div class="fc-text"><div class="fc-name">Smart Reports</div><div class="fc-desc">AI-written weekly briefs — board-ready in one click</div></div>
+        </div>
+        <div class="fc c-cyan">
+          <div class="fc-icon ib-cyan">🔗</div>
+          <div class="fc-text"><div class="fc-name">300+ Integrations</div><div class="fc-desc">Slack, Gmail, HubSpot, Stripe, Notion and more</div></div>
+        </div>
+
+        <!-- Duplicate for seamless loop -->
+        <div class="fc c-blue">
+          <div class="fc-icon ib-blue">⚡</div>
+          <div class="fc-text"><div class="fc-name">Workflow Automation</div><div class="fc-desc">300+ integrations, zero-code, AI-triggered actions</div></div>
+        </div>
+        <div class="fc c-violet">
+          <div class="fc-icon ib-violet">🎯</div>
+          <div class="fc-text"><div class="fc-name">Lead Scoring AI</div><div class="fc-desc">Score every lead 0–100 using real-time signals</div></div>
+        </div>
+        <div class="fc c-cyan">
+          <div class="fc-icon ib-cyan">📊</div>
+          <div class="fc-text"><div class="fc-name">Live Dashboard</div><div class="fc-desc">Every KPI in one glanceable, AI-summarised view</div></div>
+        </div>
+        <div class="fc c-pink">
+          <div class="fc-icon ib-pink">💬</div>
+          <div class="fc-text"><div class="fc-name">AI Chatbot</div><div class="fc-desc">Query CRM, trigger automations, get answers instantly</div></div>
+        </div>
+        <div class="fc c-teal">
+          <div class="fc-icon ib-teal">🛡</div>
+          <div class="fc-text"><div class="fc-name">SOC2 Security</div><div class="fc-desc">Enterprise-grade, end-to-end encrypted by default</div></div>
+        </div>
+        <div class="fc c-amber">
+          <div class="fc-icon ib-amber">🔮</div>
+          <div class="fc-text"><div class="fc-name">Revenue Forecast</div><div class="fc-desc">AI predicts Q4 close rates with confidence intervals</div></div>
+        </div>
+        <div class="fc c-purple">
+          <div class="fc-icon ib-purple">🎙️</div>
+          <div class="fc-text"><div class="fc-name">Voice Agent</div><div class="fc-desc">Run full BMS workflows hands-free, under 300ms latency</div></div>
+        </div>
+        <div class="fc c-rose">
+          <div class="fc-icon ib-rose">⚠️</div>
+          <div class="fc-text"><div class="fc-name">Anomaly Detection</div><div class="fc-desc">Flags revenue risk before it hits your bottom line</div></div>
+        </div>
+        <div class="fc c-emerald">
+          <div class="fc-icon ib-emerald">🤝</div>
+          <div class="fc-text"><div class="fc-name">Team Collaboration</div><div class="fc-desc">Shared dashboards, AI-assisted threads, real-time alerts</div></div>
+        </div>
+        <div class="fc c-blue">
+          <div class="fc-icon ib-blue">📋</div>
+          <div class="fc-text"><div class="fc-name">Smart Reports</div><div class="fc-desc">AI-written weekly briefs — board-ready in one click</div></div>
+        </div>
+        <div class="fc c-cyan">
+          <div class="fc-icon ib-cyan">🔗</div>
+          <div class="fc-text"><div class="fc-name">300+ Integrations</div><div class="fc-desc">Slack, Gmail, HubSpot, Stripe, Notion and more</div></div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- ── LANE 2: Stats + Quotes → moving RIGHT (opposite direction) ── -->
+    <div class="flow-lane" id="lane2">
+      <div class="flow-track" data-dir="1" data-speed="0.17">
+
+        <!-- Original -->
+        <div class="fc stat c-violet" style="--num-grad:linear-gradient(135deg,#a5c8ff,#d4b5ff)">
+          <div class="fc-stat-num">98.4%</div>
+          <div class="fc-stat-label">Automation rate within 30 days</div>
+        </div>
+        <div class="fc quote c-blue">
+          <div class="fc-quote-text">"We replaced 4 tools with AIBMS. The pipeline forecasting alone saved us $200K in missed deals."</div>
+          <div class="fc-quote-author">
+            <div class="fc-avatar" style="background:linear-gradient(135deg,#4C6EF5,#9333EA)">AK</div>
+            <div><div class="fc-author-name">Alex Kim</div><div class="fc-author-role">VP Sales, NexusAI</div></div>
+          </div>
+        </div>
+        <div class="fc stat c-pink" style="--num-grad:linear-gradient(135deg,#fca5c8,#d4b5ff)">
+          <div class="fc-stat-num">+31%</div>
+          <div class="fc-stat-label">Avg revenue lift in 6 months</div>
+        </div>
+        <div class="fc pill-card c-cyan">
+          <div class="fc-pill-icon">🏆</div>
+          <div class="fc-pill-label">G2 Leader — AI Business Tools 2025</div>
+        </div>
+        <div class="fc quote c-purple">
+          <div class="fc-quote-text">"The voice agent is genuinely magic. I brief my entire team hands-free on my morning commute."</div>
+          <div class="fc-quote-author">
+            <div class="fc-avatar" style="background:linear-gradient(135deg,#9333EA,#EC4899)">MR</div>
+            <div><div class="fc-author-name">Mia Reyes</div><div class="fc-author-role">CEO, CloudSpark</div></div>
+          </div>
+        </div>
+        <div class="fc stat c-teal" style="--num-grad:linear-gradient(135deg,#6ee7b7,#a5c8ff)">
+          <div class="fc-stat-num">300+</div>
+          <div class="fc-stat-label">Native integrations built in</div>
+        </div>
+        <div class="fc pill-card c-amber">
+          <div class="fc-pill-icon">⚡</div>
+          <div class="fc-pill-label">Live in under 1 hour, no engineers needed</div>
+        </div>
+        <div class="fc quote c-rose">
+          <div class="fc-quote-text">"AIBMS caught a $90K deal going cold that our team had missed. That's ROI on day one."</div>
+          <div class="fc-quote-author">
+            <div class="fc-avatar" style="background:linear-gradient(135deg,#F43F5E,#F59E0B)">JP</div>
+            <div><div class="fc-author-name">Jake Park</div><div class="fc-author-role">Head of Revenue, StarkMed</div></div>
+          </div>
+        </div>
+        <div class="fc stat c-emerald" style="--num-grad:linear-gradient(135deg,#6ee7b7,#22d3ee)">
+          <div class="fc-stat-num">99.9%</div>
+          <div class="fc-stat-label">Uptime SLA, enterprise-grade</div>
+        </div>
+        <div class="fc pill-card c-violet">
+          <div class="fc-pill-icon">🔒</div>
+          <div class="fc-pill-label">SOC2 Certified · GDPR Compliant</div>
+        </div>
+        <div class="fc stat c-blue" style="--num-grad:linear-gradient(135deg,#93c5fd,#6ee7b7)">
+          <div class="fc-stat-num">14.2h</div>
+          <div class="fc-stat-label">Manual work saved per team per day</div>
+        </div>
+
+        <!-- Duplicate -->
+        <div class="fc stat c-violet" style="--num-grad:linear-gradient(135deg,#a5c8ff,#d4b5ff)">
+          <div class="fc-stat-num">98.4%</div>
+          <div class="fc-stat-label">Automation rate within 30 days</div>
+        </div>
+        <div class="fc quote c-blue">
+          <div class="fc-quote-text">"We replaced 4 tools with AIBMS. The pipeline forecasting alone saved us $200K in missed deals."</div>
+          <div class="fc-quote-author">
+            <div class="fc-avatar" style="background:linear-gradient(135deg,#4C6EF5,#9333EA)">AK</div>
+            <div><div class="fc-author-name">Alex Kim</div><div class="fc-author-role">VP Sales, NexusAI</div></div>
+          </div>
+        </div>
+        <div class="fc stat c-pink" style="--num-grad:linear-gradient(135deg,#fca5c8,#d4b5ff)">
+          <div class="fc-stat-num">+31%</div>
+          <div class="fc-stat-label">Avg revenue lift in 6 months</div>
+        </div>
+        <div class="fc pill-card c-cyan">
+          <div class="fc-pill-icon">🏆</div>
+          <div class="fc-pill-label">G2 Leader — AI Business Tools 2025</div>
+        </div>
+        <div class="fc quote c-purple">
+          <div class="fc-quote-text">"The voice agent is genuinely magic. I brief my entire team hands-free on my morning commute."</div>
+          <div class="fc-quote-author">
+            <div class="fc-avatar" style="background:linear-gradient(135deg,#9333EA,#EC4899)">MR</div>
+            <div><div class="fc-author-name">Mia Reyes</div><div class="fc-author-role">CEO, CloudSpark</div></div>
+          </div>
+        </div>
+        <div class="fc stat c-teal" style="--num-grad:linear-gradient(135deg,#6ee7b7,#a5c8ff)">
+          <div class="fc-stat-num">300+</div>
+          <div class="fc-stat-label">Native integrations built in</div>
+        </div>
+        <div class="fc pill-card c-amber">
+          <div class="fc-pill-icon">⚡</div>
+          <div class="fc-pill-label">Live in under 1 hour, no engineers needed</div>
+        </div>
+        <div class="fc quote c-rose">
+          <div class="fc-quote-text">"AIBMS caught a $90K deal going cold that our team had missed. That's ROI on day one."</div>
+          <div class="fc-quote-author">
+            <div class="fc-avatar" style="background:linear-gradient(135deg,#F43F5E,#F59E0B)">JP</div>
+            <div><div class="fc-author-name">Jake Park</div><div class="fc-author-role">Head of Revenue, StarkMed</div></div>
+          </div>
+        </div>
+        <div class="fc stat c-emerald" style="--num-grad:linear-gradient(135deg,#6ee7b7,#22d3ee)">
+          <div class="fc-stat-num">99.9%</div>
+          <div class="fc-stat-label">Uptime SLA, enterprise-grade</div>
+        </div>
+        <div class="fc pill-card c-violet">
+          <div class="fc-pill-icon">🔒</div>
+          <div class="fc-pill-label">SOC2 Certified · GDPR Compliant</div>
+        </div>
+        <div class="fc stat c-blue" style="--num-grad:linear-gradient(135deg,#93c5fd,#6ee7b7)">
+          <div class="fc-stat-num">14.2h</div>
+          <div class="fc-stat-label">Manual work saved per team per day</div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- ── LANE 3: Use cases → moving left, slow ── -->
+    <div class="flow-lane" id="lane3">
+      <div class="flow-track" data-dir="-1" data-speed="0.13">
+
+        <!-- Original -->
+        <div class="fc pill-card c-blue">
+          <div class="fc-pill-icon">📈</div>
+          <div class="fc-pill-label">Scale from Seed to Series B without re-tooling</div>
+        </div>
+        <div class="fc c-violet">
+          <div class="fc-icon ib-violet">🌍</div>
+          <div class="fc-text"><div class="fc-name">Global Expansion</div><div class="fc-desc">Multi-region CRM, currencies, and compliance built in</div></div>
+        </div>
+        <div class="fc pill-card c-pink">
+          <div class="fc-pill-icon">🤖</div>
+          <div class="fc-pill-label">GPT-4o + Claude 3.5 dual-model intelligence</div>
+        </div>
+        <div class="fc c-cyan">
+          <div class="fc-icon ib-cyan">📱</div>
+          <div class="fc-text"><div class="fc-name">Mobile-First</div><div class="fc-desc">Full BMS access from iPhone, Android, or voice</div></div>
+        </div>
+        <div class="fc pill-card c-teal">
+          <div class="fc-pill-icon">🔄</div>
+          <div class="fc-pill-label">Replaces: HubSpot + Zapier + Tableau + Intercom</div>
+        </div>
+        <div class="fc c-amber">
+          <div class="fc-icon ib-amber">📅</div>
+          <div class="fc-text"><div class="fc-name">Daily AI Briefings</div><div class="fc-desc">Business summary delivered before you open your laptop</div></div>
+        </div>
+        <div class="fc pill-card c-rose">
+          <div class="fc-pill-icon">⏱</div>
+          <div class="fc-pill-label">Setup in under 1 hour — no engineers required</div>
+        </div>
+        <div class="fc c-emerald">
+          <div class="fc-icon ib-emerald">🧠</div>
+          <div class="fc-text"><div class="fc-name">Learns Your Business</div><div class="fc-desc">AI builds a unique model of your ops in minutes</div></div>
+        </div>
+        <div class="fc pill-card c-purple">
+          <div class="fc-pill-icon">🎯</div>
+          <div class="fc-pill-label">No credit card · 14-day free trial · Cancel anytime</div>
+        </div>
+        <div class="fc c-blue">
+          <div class="fc-icon ib-blue">💡</div>
+          <div class="fc-text"><div class="fc-name">Proactive Intelligence</div><div class="fc-desc">Surfaces opportunities before you know to ask</div></div>
+        </div>
+
+        <!-- Duplicate -->
+        <div class="fc pill-card c-blue">
+          <div class="fc-pill-icon">📈</div>
+          <div class="fc-pill-label">Scale from Seed to Series B without re-tooling</div>
+        </div>
+        <div class="fc c-violet">
+          <div class="fc-icon ib-violet">🌍</div>
+          <div class="fc-text"><div class="fc-name">Global Expansion</div><div class="fc-desc">Multi-region CRM, currencies, and compliance built in</div></div>
+        </div>
+        <div class="fc pill-card c-pink">
+          <div class="fc-pill-icon">🤖</div>
+          <div class="fc-pill-label">GPT-4o + Claude 3.5 dual-model intelligence</div>
+        </div>
+        <div class="fc c-cyan">
+          <div class="fc-icon ib-cyan">📱</div>
+          <div class="fc-text"><div class="fc-name">Mobile-First</div><div class="fc-desc">Full BMS access from iPhone, Android, or voice</div></div>
+        </div>
+        <div class="fc pill-card c-teal">
+          <div class="fc-pill-icon">🔄</div>
+          <div class="fc-pill-label">Replaces: HubSpot + Zapier + Tableau + Intercom</div>
+        </div>
+        <div class="fc c-amber">
+          <div class="fc-icon ib-amber">📅</div>
+          <div class="fc-text"><div class="fc-name">Daily AI Briefings</div><div class="fc-desc">Business summary delivered before you open your laptop</div></div>
+        </div>
+        <div class="fc pill-card c-rose">
+          <div class="fc-pill-icon">⏱</div>
+          <div class="fc-pill-label">Setup in under 1 hour — no engineers required</div>
+        </div>
+        <div class="fc c-emerald">
+          <div class="fc-icon ib-emerald">🧠</div>
+          <div class="fc-text"><div class="fc-name">Learns Your Business</div><div class="fc-desc">AI builds a unique model of your ops in minutes</div></div>
+        </div>
+        <div class="fc pill-card c-purple">
+          <div class="fc-pill-icon">🎯</div>
+          <div class="fc-pill-label">No credit card · 14-day free trial · Cancel anytime</div>
+        </div>
+        <div class="fc c-blue">
+          <div class="fc-icon ib-blue">💡</div>
+          <div class="fc-text"><div class="fc-name">Proactive Intelligence</div><div class="fc-desc">Surfaces opportunities before you know to ask</div></div>
+        </div>
+
+      </div>
+    </div>
+
+  </div><!-- /flow-lanes -->
+
+</section>
+
+<script>
+/* ═══════════════════════════════════════════════════════════
+   SCROLL REVEAL
+═══════════════════════════════════════════════════════════ */
+const revIO = new IntersectionObserver(entries => {
+  entries.forEach(e => {
+    if (e.isIntersecting) { e.target.classList.add('vis'); revIO.unobserve(e.target); }
+  });
+}, { threshold: 0.12 });
+document.querySelectorAll('.reveal').forEach(el => revIO.observe(el));
+
+/* ═══════════════════════════════════════════════════════════
+   PARALLAX
+═══════════════════════════════════════════════════════════ */
+const parallaxLayer = document.querySelector('.flow-parallax-slow');
+const section       = document.getElementById('flow');
+function updateParallax() {
+  const rect   = section.getBoundingClientRect();
+  const centre = rect.top + rect.height * 0.5;
+  const offset = (window.innerHeight * 0.5 - centre) * 0.18;
+  parallaxLayer.style.transform = `translateY(${offset}px)`;
+}
+window.addEventListener('scroll', updateParallax, { passive: true });
+updateParallax();
+
+/* ═══════════════════════════════════════════════════════════
+   SEAMLESS MARQUEE ENGINE
+   ─────────────────────────────────────────────────────────
+   Core idea:
+   Each track holds EXACTLY 2 copies of its content.
+   We measure halfWidth = scrollWidth / 2 (the exact width
+   of one copy, including gaps).
+
+   Each frame we add `speed * dir * dt` pixels to `pos`.
+   When |pos| >= halfWidth, we snap back by halfWidth.
+   Because the second copy is pixel-identical to the first,
+   this is invisible — no flash, no jump.
+
+   Key properties that prevent breaks:
+   1. We use `transform: translate3d(px,0,0)` — pure GPU,
+      no layout, no paint.
+   2. `dt` is capped at 50ms so tab-switching never causes
+      a large jump.
+   3. Each lane has its own `paused` flag that lerps speed
+      to 0 on hover and back on leave — no hard start/stop.
+   4. We skip frames when the section is off-screen
+      (IntersectionObserver) to save battery.
+═══════════════════════════════════════════════════════════ */
+
+const LERP_FACTOR   = 0.10; // speed lerp toward target (higher = snappier response)
+
+/* Build lane descriptors from DOM */
+const lanes = [...document.querySelectorAll('.flow-track')].map(track => {
+  const dir   = parseInt(track.dataset.dir   || '-1', 10); // -1 = left, +1 = right
+  const speed = parseFloat(track.dataset.speed || '0.35');  // pixels per ms
+
+  return {
+    el:        track,
+    dir,
+    speed,
+    pos:       dir === 1 ? 0 : 0, // starting position (px)
+    halfWidth: 0,                  // measured after first paint
+    hovered:   false,
+    curSpeed:  speed,              // current lerped speed (0 when paused)
+  };
+});
+
+/* Measure half-widths after layout */
+function measureLanes() {
+  lanes.forEach(lane => {
+    // scrollWidth is always the full double-set width
+    lane.halfWidth = lane.el.scrollWidth / 2;
+    // For rightward lanes, start at the halfway point so the
+    // initial position looks identical to the leftward lanes
+    if (lane.dir === 1) lane.pos = -lane.halfWidth;
+  });
+}
+
+/* Hover pause — lerp to 0, then back to full speed */
+document.querySelectorAll('.flow-lane').forEach((laneEl, i) => {
+  const lane = lanes[i];
+  laneEl.addEventListener('mouseenter', () => { lane.hovered = true; });
+  laneEl.addEventListener('mouseleave', () => { lane.hovered = false; });
+});
+
+/* Visibility tracking — skip when off-screen */
+let sectionVisible = false;
+const visIO = new IntersectionObserver(entries => {
+  sectionVisible = entries[0].isIntersecting;
+}, { threshold: 0 });
+visIO.observe(section);
+
+/* ── Main rAF loop ── */
+let lastTime = null;
+
+function tick(now) {
+  requestAnimationFrame(tick);
+
+  if (!sectionVisible) { lastTime = null; return; }
+
+  if (lastTime === null) { lastTime = now; return; }
+  const rawDt = now - lastTime;
+  lastTime = now;
+
+  // Cap delta to 50ms so tab-switch / lag doesn't cause a jump
+  const dt = Math.min(rawDt, 50);
+
+  lanes.forEach(lane => {
+    // Lerp speed toward target (0 if hovered, full speed otherwise)
+    const targetSpeed = lane.hovered ? 0 : lane.speed;
+    lane.curSpeed += (targetSpeed - lane.curSpeed) * LERP_FACTOR;
+
+    // Advance position
+    lane.pos += lane.curSpeed * lane.dir * dt;
+
+    // Wrap — pixel-perfect snap using measured halfWidth
+    if (lane.halfWidth > 0) {
+      if (lane.pos <= -lane.halfWidth) lane.pos += lane.halfWidth;
+      if (lane.pos >= 0)              lane.pos -= lane.halfWidth;
+    }
+
+    // Apply via translate3d — GPU composited, no layout
+    lane.el.style.transform = `translate3d(${lane.pos}px, 0, 0)`;
+  });
+}
+
+/* Init after fonts + layout settle */
+window.addEventListener('load', () => {
+  measureLanes();
+  window.addEventListener('resize', measureLanes);
+  requestAnimationFrame(tick);
+});
+
+/* ═══════════════════════════════════════════════════════════
+   CARD SIBLING DIM on hover
+═══════════════════════════════════════════════════════════ */
+document.querySelectorAll('.flow-lane').forEach(lane => {
+  const cards = lane.querySelectorAll('.fc');
+  cards.forEach(card => {
+    card.addEventListener('mouseenter', () => {
+      cards.forEach(c => { if (c !== card) c.style.opacity = '.48'; });
+    });
+    card.addEventListener('mouseleave', () => {
+      cards.forEach(c => { c.style.opacity = ''; });
+    });
+  });
+});
+</script>
+</body>
+</html>

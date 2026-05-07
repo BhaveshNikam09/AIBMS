@@ -1,0 +1,1725 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>AIBMS — AI Business Management System</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,600;12..96,700;12..96,800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet"/>
+<style>
+/* ═══════════════════════════════════════════════
+   RESET
+═══════════════════════════════════════════════ */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { width: 100%; height: 100%; overflow: hidden; }
+html { scroll-behavior: smooth; }
+body {
+  font-family: 'DM Sans', sans-serif;
+  background: #03040e;
+  color: #fff;
+  -webkit-font-smoothing: antialiased;
+  cursor: auto;
+}
+
+/* ═══════════════════════════════════════════════
+   CSS VARS
+═══════════════════════════════════════════════ */
+:root {
+  --c0: #4C6EF5;
+  --c1: #7C3AED;
+  --c2: #9C36B5;
+  --c3: #E64980;
+  --c4: #15AABF;
+  --g:  linear-gradient(135deg, #4C6EF5 0%, #9C36B5 55%, #E64980 100%);
+  --g2: linear-gradient(135deg, #15AABF 0%, #4C6EF5 50%, #9C36B5 100%);
+}
+
+/* ═══════════════════════════════════════════════
+   PAGE TRANSITION OVERLAY
+═══════════════════════════════════════════════ */
+#page-transition {
+  position: fixed; inset: 0; z-index: 99999;
+  background: #03040e;
+  pointer-events: none;
+  opacity: 1;
+  transition: opacity .72s cubic-bezier(.4,0,.2,1);
+}
+#page-transition.out { opacity: 0; }
+#page-transition.in  { opacity: 1; }
+
+/* ═══════════════════════════════════════════════
+   NOISE LAYER
+═══════════════════════════════════════════════ */
+#grain {
+  position: fixed; inset: 0; z-index: 9990;
+  pointer-events: none; opacity: .028;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='400' height='400'%3E%3Cfilter id='f'%3E%3CfeTurbulence baseFrequency='.8' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23f)'/%3E%3C/svg%3E");
+  background-size: 180px;
+}
+
+/* ═══════════════════════════════════════════════
+   HERO SHELL
+═══════════════════════════════════════════════ */
+.hero {
+  position: relative;
+  width: 100vw; height: 100vh;
+  overflow: hidden;
+  display: flex; flex-direction: column;
+}
+
+/* canvas layers */
+#bg-canvas, #aurora-canvas, #particle-canvas {
+  position: absolute; inset: 0;
+  width: 100%; height: 100%;
+  pointer-events: none;
+}
+#bg-canvas     { z-index: 0; }
+#aurora-canvas { z-index: 1; opacity: .7; }
+#particle-canvas { z-index: 2; }
+
+/* overlay stack */
+.overlay-vignette {
+  position: absolute; inset: 0; z-index: 3; pointer-events: none;
+  background:
+    /* heavy bottom for text legibility */
+    linear-gradient(to top, rgba(2,3,12,.88) 0%, rgba(2,3,12,.3) 38%, transparent 65%),
+    /* left scrim */
+    linear-gradient(to right, rgba(2,3,12,.55) 0%, rgba(2,3,12,.1) 52%, transparent 75%),
+    /* radial edge darkening */
+    radial-gradient(ellipse 110% 100% at 50% 50%, transparent 28%, rgba(0,0,0,.6) 100%);
+}
+.overlay-grid {
+  position: absolute; inset: 0; z-index: 4; pointer-events: none;
+  background-image:
+    linear-gradient(rgba(255,255,255,.024) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,.024) 1px, transparent 1px);
+  background-size: 88px 88px;
+  /* fade grid toward edges */
+  mask-image: radial-gradient(ellipse 88% 75% at 50% 38%, black 15%, transparent 75%);
+}
+/* Aurora band — richer, two-tone sweep */
+.overlay-aurora {
+  position: absolute; top: 0; left: 0; right: 0; height: 340px; z-index: 1; pointer-events: none;
+  background:
+    radial-gradient(ellipse 70% 200% at 30% -30%, rgba(76,110,245,.18) 0%, transparent 65%),
+    radial-gradient(ellipse 60% 180% at 75% -20%, rgba(156,54,181,.16) 0%, transparent 60%);
+  animation: aurora-shift 12s ease-in-out infinite alternate;
+}
+@keyframes aurora-shift {
+  0%   { opacity: .8; filter: hue-rotate(0deg); }
+  100% { opacity: 1;  filter: hue-rotate(18deg); }
+}
+
+/* ═══════════════════════════════════════════════
+   NAV
+═══════════════════════════════════════════════ */
+nav {
+  position: relative; z-index: 100; flex-shrink: 0;
+  height: 66px;
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 0 52px;
+  background: rgba(3,4,14,.22);
+  backdrop-filter: blur(18px) saturate(180%);
+  border-bottom: none;
+  /* entrance: translate on Y handled via JS class */
+  opacity: 0;
+  transform: translateY(-16px);
+  transition: opacity .7s cubic-bezier(.22,1,.36,1),
+              transform .7s cubic-bezier(.22,1,.36,1);
+}
+/* animated gradient bottom border */
+nav::after {
+  content: ''; position: absolute;
+  bottom: 0; left: 0; right: 0; height: 1px;
+  background: linear-gradient(90deg,
+    transparent 0%,
+    rgba(76,110,245,.35) 20%,
+    rgba(156,54,181,.5) 40%,
+    rgba(228,73,128,.45) 60%,
+    rgba(156,54,181,.35) 80%,
+    transparent 100%);
+  background-size: 200% 100%;
+  animation: nav-border-flow 6s linear infinite;
+}
+@keyframes nav-border-flow {
+  0%   { background-position: 100% 0; }
+  100% { background-position: -100% 0; }
+}
+nav.visible { opacity: 1; transform: translateY(0); }
+
+.nav-logo {
+  display: flex; align-items: center; gap: 10px;
+  font-family: 'Bricolage Grotesque', sans-serif;
+  font-size: 1.05rem; font-weight: 700; letter-spacing: -.025em;
+  color: #fff; text-decoration: none;
+}
+.logo-gem {
+  width: 32px; height: 32px; border-radius: 8px;
+  background: var(--g);
+  display: flex; align-items: center; justify-content: center;
+  position: relative; overflow: hidden;
+  box-shadow: 0 4px 20px rgba(156,54,181,.45);
+  animation: gem-pulse 4s ease-in-out infinite;
+}
+@keyframes gem-pulse {
+  0%,100% { box-shadow: 0 4px 20px rgba(156,54,181,.45); }
+  50%     { box-shadow: 0 4px 28px rgba(156,54,181,.7), 0 0 40px rgba(76,110,245,.25); }
+}
+.logo-gem::after {
+  content: ''; position: absolute; inset: 0;
+  background: linear-gradient(135deg, rgba(255,255,255,.24) 0%, transparent 55%);
+}
+.logo-gem svg { position: relative; z-index: 1; }
+
+/* mode pill */
+.nav-mode {
+  display: flex; align-items: center;
+  background: rgba(255,255,255,.055);
+  border: 1px solid rgba(255,255,255,.1);
+  border-radius: 100px; padding: 4px;
+  backdrop-filter: blur(10px);
+  /* sliding indicator */
+  position: relative;
+}
+.nav-mode-bg {
+  position: absolute;
+  height: calc(100% - 8px); top: 4px; left: 4px;
+  border-radius: 100px;
+  background: var(--g);
+  box-shadow: 0 2px 14px rgba(156,54,181,.5);
+  will-change: transform, width;
+  /* move via JS transform — no left/width transitions needed because we use transform */
+  transition: transform .38s cubic-bezier(.34,1.56,.64,1),
+              width .38s cubic-bezier(.34,1.56,.64,1);
+}
+.nav-pill {
+  position: relative; z-index: 1;
+  padding: 7px 22px; border-radius: 100px;
+  font-size: .82rem; font-weight: 600;
+  color: rgba(255,255,255,.5); cursor: none;
+  user-select: none;
+  transition: color .3s;
+}
+.nav-pill.active { color: #fff; }
+
+.nav-links {
+  display: flex; gap: 32px; list-style: none;
+  position: absolute; left: 50%;
+  transform: translateX(-50%) translateX(70px);
+}
+.nav-links a {
+  font-size: .84rem; font-weight: 400;
+  color: rgba(255,255,255,.52); text-decoration: none;
+  transition: color .22s;
+}
+.nav-links a:hover { color: #fff; }
+
+.nav-r { display: flex; align-items: center; gap: 14px; }
+.nav-si {
+  font-size: .84rem; color: rgba(255,255,255,.52);
+  text-decoration: none; font-weight: 500; transition: color .22s;
+}
+.nav-si:hover { color: #fff; }
+.nav-cta {
+  position: relative; overflow: hidden;
+  font-size: .84rem; font-weight: 700;
+  font-family: 'DM Sans', sans-serif;
+  background: var(--g); color: #fff;
+  border: none; cursor: none;
+  padding: 9px 22px; border-radius: 100px;
+  text-decoration: none;
+  box-shadow: 0 4px 22px rgba(156,54,181,.35);
+  transition: box-shadow .3s cubic-bezier(.22,1,.36,1);
+  will-change: transform;
+}
+.nav-cta::before {
+  content: ''; position: absolute; inset: 0;
+  background: linear-gradient(135deg, rgba(255,255,255,.18) 0%, transparent 55%);
+}
+
+/* ═══════════════════════════════════════════════
+   HERO BODY
+═══════════════════════════════════════════════ */
+.hero-body {
+  flex: 1; position: relative; z-index: 10;
+  display: flex; align-items: flex-end;
+  padding: 0 60px 68px;
+}
+.hero-text { max-width: 660px; }
+
+/* ─ Headline ─
+   Each word sits in an overflow:hidden line-box
+   so the clip reveal is clean, not full-page
+*/
+.h1-line { overflow: hidden; line-height: 1.08; }
+.h1-word {
+  display: inline-block;
+  opacity: 0;
+  transform: translateY(100%);
+  will-change: transform, opacity;
+  transition: opacity .72s cubic-bezier(.22,1,.36,1),
+              transform .72s cubic-bezier(.22,1,.36,1);
+}
+.h1-word.revealed {
+  opacity: 1;
+  transform: translateY(0);
+}
+.hero-h1 {
+  font-family: 'Bricolage Grotesque', sans-serif;
+  font-size: clamp(3rem, 5.6vw, 5.4rem);
+  font-weight: 800; letter-spacing: -.045em; color: #fff;
+  margin-bottom: 26px;
+}
+/* gradient word — hue gently drifts */
+.h1-grad {
+  background: var(--g);
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+  background-clip: text;
+  animation: hue-drift 8s ease-in-out infinite;
+  /* glow bloom behind the gradient text */
+  filter: drop-shadow(0 0 28px rgba(156,54,181,.45)) drop-shadow(0 0 60px rgba(76,110,245,.25));
+}
+@keyframes hue-drift {
+  0%,100% { filter: drop-shadow(0 0 24px rgba(156,54,181,.4)) drop-shadow(0 0 48px rgba(76,110,245,.2)) hue-rotate(0deg) brightness(1); }
+  40%     { filter: drop-shadow(0 0 36px rgba(228,73,128,.55)) drop-shadow(0 0 70px rgba(156,54,181,.3)) hue-rotate(22deg) brightness(1.08); }
+  75%     { filter: drop-shadow(0 0 28px rgba(76,110,245,.45)) drop-shadow(0 0 52px rgba(21,170,191,.25)) hue-rotate(-10deg) brightness(1.04); }
+}
+
+/* Hero badge */
+.hero-badge {
+  display: inline-flex; align-items: center; gap: 9px;
+  margin-bottom: 28px;
+  padding: 7px 18px 7px 10px;
+  border-radius: 100px;
+  font-size: .76rem; font-weight: 600;
+  color: rgba(255,255,255,.68); letter-spacing: .02em;
+  opacity: 0; transform: translateY(14px);
+  transition: opacity .72s cubic-bezier(.22,1,.36,1),
+              transform .72s cubic-bezier(.22,1,.36,1);
+  /* animated gradient border via background-clip trick */
+  background:
+    linear-gradient(rgba(6,4,20,.85), rgba(6,4,20,.85)) padding-box,
+    linear-gradient(90deg, #4C6EF5, #9C36B5, #E64980, #9C36B5, #4C6EF5) border-box;
+  border: 1px solid transparent;
+  background-size: 200% 100%, 300% 100%;
+  animation: badge-border 4s linear infinite;
+}
+.hero-badge.revealed { opacity: 1; transform: translateY(0); }
+@keyframes badge-border {
+  0%   { background-position: 0 0, 0% 0; }
+  100% { background-position: 0 0, 300% 0; }
+}
+.badge-dot {
+  width: 7px; height: 7px; border-radius: 50%;
+  background: var(--c4);
+  box-shadow: 0 0 6px var(--c4), 0 0 12px rgba(21,170,191,.5);
+  animation: badge-dot-pulse 2.2s ease-in-out infinite;
+  flex-shrink: 0;
+}
+@keyframes badge-dot-pulse {
+  0%,100% { transform: scale(1); box-shadow: 0 0 5px var(--c4), 0 0 10px rgba(21,170,191,.45); }
+  50%     { transform: scale(1.25); box-shadow: 0 0 10px var(--c4), 0 0 22px rgba(21,170,191,.7); }
+}
+
+/* ─ Subheading ─ */
+.hero-sub {
+  font-size: 1.07rem; font-weight: 300;
+  color: rgba(255,255,255,.58);
+  line-height: 1.72; max-width: 490px;
+  margin-bottom: 40px;
+  opacity: 0; transform: translateY(18px);
+  transition: opacity .72s cubic-bezier(.22,1,.36,1),
+              transform .72s cubic-bezier(.22,1,.36,1);
+  will-change: transform, opacity;
+}
+.hero-sub.revealed { opacity: 1; transform: translateY(0); }
+
+/* ─ CTAs ─ */
+.hero-ctas {
+  display: flex; align-items: center; gap: 14px;
+  opacity: 0; transform: translateY(18px);
+  transition: opacity .72s cubic-bezier(.22,1,.36,1),
+              transform .72s cubic-bezier(.22,1,.36,1);
+  will-change: transform, opacity;
+}
+.hero-ctas.revealed { opacity: 1; transform: translateY(0); }
+
+/* Primary CTA */
+.cta-p {
+  position: relative; overflow: hidden;
+  display: inline-flex; align-items: center; gap: 10px;
+  font-family: 'Bricolage Grotesque', sans-serif;
+  font-size: 1rem; font-weight: 700; letter-spacing: -.01em;
+  color: #fff; text-decoration: none; cursor: none;
+  padding: 16px 30px; border-radius: 100px;
+  background: var(--g);
+  /* layered shadow for depth */
+  box-shadow:
+    0 0 0 1px rgba(255,255,255,.1),
+    0 8px 28px rgba(156,54,181,.38),
+    0 2px 6px rgba(0,0,0,.3),
+    inset 0 1px 0 rgba(255,255,255,.18);
+  will-change: transform;
+  /* transform via JS spring — no CSS transition on transform */
+  transition: box-shadow .35s cubic-bezier(.22,1,.36,1);
+}
+/* sheen layer */
+.cta-p::before {
+  content: ''; position: absolute; inset: 0;
+  background: linear-gradient(135deg, rgba(255,255,255,.22) 0%, transparent 55%);
+  pointer-events: none;
+}
+/* shimmer sweep */
+.cta-p::after {
+  content: ''; position: absolute;
+  top: 0; left: -110%; width: 70%; height: 100%;
+  background: linear-gradient(90deg,
+    transparent 0%, rgba(255,255,255,.16) 50%, transparent 100%);
+  transform: skewX(-20deg);
+  animation: sweep 4s ease-in-out infinite 2.2s;
+}
+@keyframes sweep {
+  0%,100% { left: -110%; opacity: 1; }
+  50%     { left: 130%;  opacity: 1; }
+  50.01%  { opacity: 0;  }
+  100%    { opacity: 0;  }
+}
+/* glow ring — opacity via class, size via transition */
+.cta-ring {
+  position: absolute; inset: -4px; border-radius: 100px;
+  border: 1.5px solid rgba(228,73,128,.0);
+  opacity: 0;
+  transition: opacity .3s, border-color .3s, inset .3s;
+  pointer-events: none;
+}
+.cta-p:hover .cta-ring {
+  opacity: 1; inset: -5px;
+  border-color: rgba(228,73,128,.65);
+}
+.cta-p:hover {
+  box-shadow:
+    0 0 0 1px rgba(255,255,255,.14),
+    0 18px 50px rgba(156,54,181,.62),
+    0 4px 10px rgba(0,0,0,.35),
+    inset 0 1px 0 rgba(255,255,255,.22);
+}
+
+/* arrow pip */
+.cta-arrow {
+  display: flex; align-items: center; justify-content: center;
+  width: 26px; height: 26px; border-radius: 50%;
+  background: rgba(255,255,255,.18);
+  flex-shrink: 0;
+  /* arrow moves via JS spring — no transition here */
+}
+
+/* Secondary CTA */
+.cta-s {
+  display: inline-flex; align-items: center; gap: 9px;
+  font-size: .92rem; font-weight: 500;
+  color: rgba(255,255,255,.68);
+  background: rgba(255,255,255,.055);
+  border: 1px solid rgba(255,255,255,.12);
+  border-radius: 100px; padding: 15px 28px;
+  text-decoration: none; cursor: none;
+  backdrop-filter: blur(12px);
+  /* transform via JS spring */
+  transition: color .3s, border-color .3s, background .3s, box-shadow .3s;
+}
+.cta-s:hover {
+  color: #fff;
+  border-color: rgba(156,54,181,.45);
+  background: rgba(156,54,181,.1);
+  box-shadow: 0 0 28px rgba(156,54,181,.14);
+}
+.play-circle {
+  width: 22px; height: 22px; border-radius: 50%;
+  border: 1px solid rgba(255,255,255,.25);
+  display: flex; align-items: center; justify-content: center;
+  transition: border-color .3s, background .3s;
+}
+.cta-s:hover .play-circle {
+  border-color: rgba(156,54,181,.7);
+  background: rgba(156,54,181,.18);
+}
+
+/* ─ Social proof ─ */
+.sp {
+  display: flex; align-items: center; gap: 14px;
+  margin-top: 30px;
+  opacity: 0; transform: translateY(14px);
+  transition: opacity .72s cubic-bezier(.22,1,.36,1),
+              transform .72s cubic-bezier(.22,1,.36,1);
+}
+.sp.revealed { opacity: 1; transform: translateY(0); }
+.sp-avs { display: flex; }
+.sp-av {
+  width: 28px; height: 28px; border-radius: 50%;
+  border: 2px solid rgba(3,4,14,.8);
+  margin-left: -8px; font-size: .52rem; font-weight: 700;
+  display: flex; align-items: center; justify-content: center;
+  font-family: 'Bricolage Grotesque', sans-serif;
+}
+.sp-av:first-child { margin-left: 0; }
+.sp-div { width: 1px; height: 26px; background: rgba(255,255,255,.1); }
+.sp-txt { font-size: .77rem; color: rgba(255,255,255,.42); line-height: 1.45; }
+.sp-txt strong { color: rgba(255,255,255,.72); font-weight: 600; }
+.sp-stars { color: #F59E0B; font-size: .7rem; letter-spacing: 1.5px; margin-bottom: 1px; }
+
+/* ═══════════════════════════════════════════════
+   FLOATING CARDS
+   — position / float via JS spring physics
+   — CSS only handles visual appearance
+═══════════════════════════════════════════════ */
+.f-cards-layer {
+  position: absolute;
+  right: 52px; top: 80px; bottom: 60px;
+  width: 420px; z-index: 10;
+  pointer-events: none; /* individual cards re-enable via JS */
+}
+
+/* Base card style */
+.fc {
+  position: absolute;
+  background: rgba(6, 4, 20, .68);
+  border: 1px solid rgba(255,255,255,.1);
+  border-radius: 18px;
+  padding: 18px 20px;
+  backdrop-filter: blur(20px) saturate(160%);
+  box-shadow:
+    0 0 0 1px rgba(255,255,255,.04),
+    0 28px 60px rgba(0,0,0,.52),
+    inset 0 1px 0 rgba(255,255,255,.06);
+  overflow: hidden;
+  opacity: 0;
+  will-change: transform, opacity;
+  pointer-events: auto;
+  transition: opacity .6s cubic-bezier(.22,1,.36,1),
+              border-color .4s cubic-bezier(.22,1,.36,1),
+              box-shadow .4s cubic-bezier(.22,1,.36,1);
+}
+.fc.visible { opacity: 1; }
+/* inner specular highlight — top-left corner catch light */
+.fc::after {
+  content: ''; position: absolute;
+  top: 0; left: 0;
+  width: 55%; height: 40%;
+  background: radial-gradient(ellipse at 20% 20%, rgba(255,255,255,.05) 0%, transparent 70%);
+  pointer-events: none; border-radius: 18px 0 0 0;
+}
+/* top accent line per card */
+.fc::before {
+  content: ''; position: absolute;
+  top: 0; left: 0; right: 0; height: 1.5px;
+  border-radius: 18px 18px 0 0;
+  z-index: 1;
+}
+.fc-a { top: 4%;  right: 8px;  width: 232px; }
+.fc-b { top: 36%; right: 208px; width: 208px; }
+.fc-c { bottom: 10%; right: 32px; width: 256px; }
+.fc-d { top: 60%; right: 224px; width: 178px; }
+
+.fc-a::before { background: linear-gradient(90deg, transparent, #4C6EF5 40%, #7C3AED, transparent); }
+.fc-b::before { background: linear-gradient(90deg, transparent, #9C36B5 40%, #E64980, transparent); }
+.fc-c::before { background: linear-gradient(90deg, transparent, #E64980 40%, #9C36B5, transparent); }
+.fc-d::before { background: linear-gradient(90deg, transparent, #15AABF 40%, #4C6EF5, transparent); }
+
+/* ─ Card internals ─ */
+.fc-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
+.fc-lbl { font-size: .6rem; font-weight: 600; text-transform: uppercase; letter-spacing: .09em; color: rgba(255,255,255,.35); }
+.live-badge {
+  display: flex; align-items: center; gap: 4px;
+  font-size: .59rem; font-weight: 700; color: #34D399;
+  background: rgba(52,211,153,.09);
+  border: 1px solid rgba(52,211,153,.2);
+  border-radius: 100px; padding: 2px 8px;
+}
+.live-dot {
+  width: 5px; height: 5px; border-radius: 50%;
+  background: #34D399;
+  animation: live-pulse 2.4s ease-in-out infinite;
+}
+@keyframes live-pulse {
+  0%,100% { opacity:1; box-shadow: 0 0 0 0 rgba(52,211,153,.6); }
+  50%     { opacity:.5; box-shadow: 0 0 0 4px rgba(52,211,153,0); }
+}
+.fc-val {
+  font-family: 'Bricolage Grotesque', sans-serif;
+  font-size: 1.55rem; font-weight: 800;
+  letter-spacing: -.04em; color: #fff; line-height: 1;
+  margin-bottom: 3px;
+}
+.fc-caption { font-size: .67rem; color: rgba(255,255,255,.38); }
+.delta {
+  display: inline-flex; align-items: center; gap: 3px;
+  font-size: .67rem; font-weight: 700;
+  padding: 2px 8px; border-radius: 100px; margin-top: 7px;
+}
+.delta-up { background: rgba(52,211,153,.09); color: #34D399; border: 1px solid rgba(52,211,153,.18); }
+.delta-dn { background: rgba(248,113,113,.08); color: #F87171; border: 1px solid rgba(248,113,113,.16); }
+
+/* Mini bar chart */
+.bars-wrap { display: flex; align-items: flex-end; gap: 4px; height: 46px; margin-top: 13px; }
+.bar {
+  flex: 1; border-radius: 3px 3px 0 0;
+  background: var(--g);
+  transition: opacity .25s, box-shadow .25s;
+  opacity: .6;
+}
+.bars-wrap:hover .bar { opacity: .3; }
+.bar:hover { opacity: 1 !important; box-shadow: 0 0 10px rgba(156,54,181,.55); }
+
+/* Pipeline rows */
+.pr {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 7px 9px;
+  background: rgba(255,255,255,.04);
+  border: 1px solid rgba(255,255,255,.06);
+  border-radius: 7px; margin-bottom: 6px;
+  transition: border-color .25s cubic-bezier(.22,1,.36,1),
+              transform .25s cubic-bezier(.22,1,.36,1);
+}
+.pr:last-child { margin-bottom: 0; }
+.pr:hover { border-color: rgba(156,54,181,.32); transform: translateX(3px); }
+.pr-name { font-size: .74rem; font-weight: 600; color: #fff; }
+.pr-sub  { font-size: .64rem; color: rgba(255,255,255,.38); margin-top: 1px; }
+.badge {
+  font-size: .6rem; font-weight: 700;
+  padding: 2px 8px; border-radius: 100px;
+}
+.b-pu { background: rgba(156,54,181,.14); color: #C084FC; border: 1px solid rgba(156,54,181,.24); }
+.b-gr { background: rgba(52,211,153,.1);  color: #34D399;  border: 1px solid rgba(52,211,153,.2); }
+.b-ye { background: rgba(251,191,36,.09); color: #FBB824;  border: 1px solid rgba(251,191,36,.18); }
+
+/* AI insight pills */
+.ai-pill {
+  display: flex; align-items: flex-start; gap: 8px;
+  background: rgba(76,110,245,.09);
+  border: 1px solid rgba(76,110,245,.2);
+  border-radius: 9px; padding: 9px 11px; margin-bottom: 7px;
+}
+.ai-pill.green {
+  background: rgba(52,211,153,.07);
+  border-color: rgba(52,211,153,.18);
+}
+.ai-pill-icon { font-size: .88rem; line-height: 1.4; }
+.ai-pill-text { font-size: .69rem; color: rgba(255,255,255,.6); line-height: 1.45; }
+.ai-pill-text strong { font-weight: 600; color: #93C5FD; }
+.ai-pill.green .ai-pill-text strong { color: #6EE7B7; }
+
+/* Progress bar */
+.pbar-row { display: flex; justify-content: space-between; align-items: center; margin-top: 10px; margin-bottom: 5px; }
+.pbar-lbl { font-size: .6rem; color: rgba(255,255,255,.36); }
+.pbar-val { font-size: .68rem; font-weight: 700; color: #34D399; }
+.pbar { width: 100%; height: 3px; background: rgba(255,255,255,.08); border-radius: 2px; overflow: hidden; }
+.pbar-fill {
+  height: 100%; border-radius: 2px;
+  background: linear-gradient(90deg, var(--c4), var(--c0));
+  box-shadow: 0 0 7px rgba(21,170,191,.45);
+  animation: pbar-grow 1.6s cubic-bezier(.22,1,.36,1) 1.6s both;
+}
+@keyframes pbar-grow { from { width: 0; } }
+
+/* Sparkline */
+.spark { margin-top: 12px; width: 100%; display: block; }
+
+/* ═══════════════════════════════════════════════
+   CARD E — wide donut/ring stat card
+═══════════════════════════════════════════════ */
+.fc-e { top: 20%; right: 108px; width: 200px; }
+.fc-e::before { background: linear-gradient(90deg, transparent, #34D399 40%, #15AABF, transparent); }
+
+.donut-wrap {
+  display: flex; align-items: center; gap: 14px;
+  margin-top: 10px;
+}
+.donut-svg { flex-shrink: 0; }
+.donut-track { fill: none; stroke: rgba(255,255,255,.07); stroke-width: 5; }
+.donut-fill  {
+  fill: none; stroke-width: 5; stroke-linecap: round;
+  stroke: url(#dg);
+  stroke-dasharray: 88 200;
+  stroke-dashoffset: 22;
+  animation: donut-spin 2s cubic-bezier(.22,1,.36,1) 1.4s both;
+  transform-origin: center; transform: rotate(-90deg);
+}
+@keyframes donut-spin {
+  from { stroke-dasharray: 0 200; }
+  to   { stroke-dasharray: 88 200; }
+}
+.donut-label { text-align: left; }
+.donut-pct {
+  font-family: 'Bricolage Grotesque', sans-serif;
+  font-size: 1.4rem; font-weight: 800;
+  letter-spacing: -.04em; color: #34D399; line-height: 1;
+}
+.donut-sub { font-size: .62rem; color: rgba(255,255,255,.36); margin-top: 2px; }
+
+/* ═══════════════════════════════════════════════
+   LIVE TICKER STRIP — bottom-left under social proof
+═══════════════════════════════════════════════ */
+.ticker-wrap {
+  margin-top: 24px;
+  overflow: hidden;
+  width: 490px; max-width: 100%;
+  mask-image: linear-gradient(90deg, transparent, black 8%, black 92%, transparent);
+  opacity: 0; transform: translateY(10px);
+  transition: opacity .72s cubic-bezier(.22,1,.36,1),
+              transform .72s cubic-bezier(.22,1,.36,1);
+}
+.ticker-wrap.revealed { opacity: 1; transform: translateY(0); }
+.ticker-track {
+  display: flex; gap: 0; width: max-content;
+  animation: ticker-scroll 22s linear infinite;
+}
+.ticker-track:hover { animation-play-state: paused; }
+@keyframes ticker-scroll {
+  0%   { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+.ticker-item {
+  display: flex; align-items: center; gap: 8px;
+  padding: 6px 18px; white-space: nowrap;
+  border-right: 1px solid rgba(255,255,255,.07);
+  font-size: .72rem; color: rgba(255,255,255,.38);
+}
+.ticker-item .ti-dot {
+  width: 5px; height: 5px; border-radius: 50%; flex-shrink: 0;
+}
+.ticker-item .ti-val { color: rgba(255,255,255,.68); font-weight: 600; }
+
+/* ═══════════════════════════════════════════════
+   HORIZON GLOW LINE — bottom edge atmosphere
+═══════════════════════════════════════════════ */
+.horizon-glow {
+  position: absolute;
+  bottom: 0; left: 0; right: 0;
+  height: 120px; z-index: 5; pointer-events: none;
+  /* the bright line itself */
+  background:
+    linear-gradient(to top,
+      rgba(2,3,12,0) 0%,
+      rgba(2,3,12,0) 50%,
+      rgba(2,3,12,0) 100%);
+}
+.horizon-glow::before {
+  content: ''; position: absolute;
+  bottom: 0; left: 8%; right: 8%; height: 1.5px;
+  background: linear-gradient(90deg,
+    transparent 0%,
+    rgba(76,110,245,.4) 18%,
+    rgba(156,54,181,.65) 38%,
+    rgba(228,73,128,.6) 52%,
+    rgba(156,54,181,.5) 68%,
+    rgba(76,110,245,.35) 82%,
+    transparent 100%);
+  filter: blur(.5px);
+  animation: horizon-breathe 6s ease-in-out infinite;
+}
+.horizon-glow::after {
+  content: ''; position: absolute;
+  bottom: 0; left: 0; right: 0; height: 100px;
+  background: radial-gradient(ellipse 60% 100% at 50% 100%,
+    rgba(100,40,200,.14) 0%, transparent 70%);
+  animation: horizon-breathe 6s ease-in-out infinite;
+}
+@keyframes horizon-breathe {
+  0%,100% { opacity: .7; }
+  50%     { opacity: 1; }
+}
+
+/* ═══════════════════════════════════════════════
+   COUNT-UP NUMBERS in cards
+═══════════════════════════════════════════════ */
+.count-up { display: inline; }
+
+/* ═══════════════════════════════════════════════
+   MAGNETIC ZONE (CTA area glow background)
+═══════════════════════════════════════════════ */
+.cta-magnetic-zone {
+  position: relative; display: inline-block;
+}
+/* soft glow halo that follows the button */
+.cta-magnetic-zone::after {
+  content: ''; position: absolute;
+  inset: -20px; border-radius: 100px;
+  background: radial-gradient(ellipse, rgba(156,54,181,.15) 0%, transparent 70%);
+  pointer-events: none; opacity: 0;
+  transition: opacity .4s;
+}
+.cta-magnetic-zone:hover::after { opacity: 1; }
+
+/* ═══════════════════════════════════════════════
+   SCROLL INDICATOR
+═══════════════════════════════════════════════ */
+.scroll-cue {
+  position: absolute; bottom: 28px; left: 50%;
+  transform: translateX(-50%);
+  z-index: 20;
+  display: flex; flex-direction: column; align-items: center; gap: 8px;
+  opacity: 0;
+  transition: opacity .6s cubic-bezier(.22,1,.36,1);
+}
+.scroll-cue.visible { opacity: 1; }
+.sc-mouse {
+  width: 20px; height: 32px;
+  border: 1.5px solid rgba(255,255,255,.2); border-radius: 100px;
+  display: flex; justify-content: center;
+}
+.sc-dot {
+  width: 3px; height: 6px; border-radius: 100px;
+  background: rgba(255,255,255,.5);
+  margin-top: 5px;
+  animation: sc-drop 2.6s cubic-bezier(.455,.03,.515,.955) infinite;
+}
+@keyframes sc-drop {
+  0%   { opacity:1; transform: translateY(0); }
+  60%  { opacity:0; transform: translateY(12px); }
+  61%  { opacity:0; transform: translateY(0); }
+  100% { opacity:0; }
+}
+.sc-chevs { display: flex; flex-direction: column; gap: 3px; align-items: center; }
+.sc-ch {
+  width: 8px; height: 8px;
+  border-right: 1.5px solid rgba(255,255,255,.3);
+  border-bottom: 1.5px solid rgba(255,255,255,.3);
+  transform: rotate(45deg);
+}
+.sc-ch:nth-child(1) { animation: sc-blink 2.6s ease-in-out infinite 0s; }
+.sc-ch:nth-child(2) { animation: sc-blink 2.6s ease-in-out infinite .18s; opacity: .55; }
+.sc-ch:nth-child(3) { animation: sc-blink 2.6s ease-in-out infinite .36s; opacity: .28; }
+@keyframes sc-blink { 0%,100%{opacity:inherit}45%{opacity:.1} }
+.sc-lbl { font-size: .59rem; color: rgba(255,255,255,.25); text-transform: uppercase; letter-spacing: .12em; }
+</style>
+</head>
+<body>
+<div id="page-transition"></div>
+<div id="grain"></div>
+
+<section class="hero" id="hero">
+  <canvas id="bg-canvas"></canvas>
+  <canvas id="aurora-canvas"></canvas>
+  <canvas id="particle-canvas"></canvas>
+  <div class="overlay-aurora"></div>
+  <div class="overlay-vignette"></div>
+  <div class="overlay-grid"></div>
+
+  <!-- ─── NAV ─── -->
+  <nav id="nav">
+    <a href="#" class="nav-logo">
+      <div class="logo-gem">
+        <svg width="16" height="16" viewBox="0 0 18 18" fill="none">
+          <path d="M9 2L3 5.5v7L9 16l6-3.5v-7L9 2z" stroke="white" stroke-width="1.5" stroke-linejoin="round"/>
+          <path d="M9 2v14M3 5.5l6 3.5 6-3.5" stroke="white" stroke-width="1.2"/>
+        </svg>
+      </div>
+      AIBMS
+    </a>
+
+    <div class="nav-mode" id="navMode">
+      <div class="nav-mode-bg" id="navModeBg"></div>
+      <div class="nav-pill active" data-idx="0">Business</div>
+      <div class="nav-pill" data-idx="1">Enterprise</div>
+    </div>
+
+    <ul class="nav-links">
+      <li><a href="#">Platform</a></li>
+      <li><a href="#">Product</a></li>
+      <li><a href="#">Pricing</a></li>
+      <li><a href="#">Docs</a></li>
+    </ul>
+
+    <div class="nav-r">
+      <a href="#" class="nav-si">Sign in</a>
+      <a href="#" class="nav-cta">Get started</a>
+    </div>
+  </nav>
+
+  <!-- ─── FLOATING CARDS ─── -->
+  <div class="f-cards-layer" aria-hidden="true">
+
+    <!-- Card A: Revenue -->
+    <div class="fc fc-a" id="fc-a">
+      <div class="fc-head">
+        <span class="fc-lbl">Total Revenue</span>
+        <span class="live-badge"><span class="live-dot"></span>Live</span>
+      </div>
+      <div class="fc-val">$2.41M</div>
+      <div class="fc-caption">All channels · this quarter</div>
+      <span class="delta delta-up">↑ 18.3% vs last month</span>
+      <div class="bars-wrap">
+        <div class="bar" style="height:42%"></div>
+        <div class="bar" style="height:57%"></div>
+        <div class="bar" style="height:48%"></div>
+        <div class="bar" style="height:72%"></div>
+        <div class="bar" style="height:63%"></div>
+        <div class="bar" style="height:88%"></div>
+        <div class="bar" style="height:100%"></div>
+      </div>
+    </div>
+
+    <!-- Card B: Pipeline -->
+    <div class="fc fc-b" id="fc-b">
+      <div class="fc-head">
+        <span class="fc-lbl">Pipeline</span>
+        <span style="font-size:.59rem;color:rgba(255,255,255,.32)">5 active</span>
+      </div>
+      <div class="pr">
+        <div><div class="pr-name">Acme Corp</div><div class="pr-sub">$48K · 94%</div></div>
+        <span class="badge b-pu">Proposal</span>
+      </div>
+      <div class="pr">
+        <div><div class="pr-name">Nexus AI</div><div class="pr-sub">$91K · 88%</div></div>
+        <span class="badge b-ye">Negot.</span>
+      </div>
+      <div class="pr" style="margin-bottom:0">
+        <div><div class="pr-name">StarkMed</div><div class="pr-sub">$15K</div></div>
+        <span class="badge b-gr">Won ✓</span>
+      </div>
+    </div>
+
+    <!-- Card C: AI Insights -->
+    <div class="fc fc-c" id="fc-c">
+      <div class="fc-head">
+        <span class="fc-lbl">AI Insights</span>
+        <span class="live-badge"><span class="live-dot"></span>Active</span>
+      </div>
+      <div class="ai-pill">
+        <div class="ai-pill-icon">⚠️</div>
+        <div class="ai-pill-text"><strong>Risk:</strong> APAC pipeline slowing — re-engage Horizon Labs today.</div>
+      </div>
+      <div class="ai-pill green">
+        <div class="ai-pill-icon">✅</div>
+        <div class="ai-pill-text"><strong>EU expansion approved</strong> — AI confidence 96.4%</div>
+      </div>
+      <div class="pbar-row">
+        <span class="pbar-lbl">System uptime</span>
+        <span class="pbar-val">99.97%</span>
+      </div>
+      <div class="pbar"><div class="pbar-fill" style="width:99.97%"></div></div>
+    </div>
+
+    <!-- Card D: Automation -->
+    <div class="fc fc-d" id="fc-d">
+      <div class="fc-head">
+        <span class="fc-lbl">Automated</span>
+        <span class="live-badge"><span class="live-dot"></span>Live</span>
+      </div>
+      <div class="fc-val" style="font-size:1.35rem">98,402</div>
+      <div class="fc-caption">AI tasks today</div>
+      <span class="delta delta-up">↑ 32% this week</span>
+      <svg class="spark" viewBox="0 0 160 36" fill="none" preserveAspectRatio="none">
+        <defs>
+          <linearGradient id="sl" x1="0" y1="0" x2="1" y2="0">
+            <stop offset="0%" stop-color="#4C6EF5"/><stop offset="100%" stop-color="#E64980"/>
+          </linearGradient>
+          <linearGradient id="sf" x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0%" stop-color="#9C36B5" stop-opacity=".28"/>
+            <stop offset="100%" stop-color="#9C36B5" stop-opacity="0"/>
+          </linearGradient>
+        </defs>
+        <path d="M0,30 C22,28 34,20 54,18 C74,16 82,23 104,14 C124,5 138,8 160,2 L160,36 L0,36Z" fill="url(#sf)"/>
+        <path d="M0,30 C22,28 34,20 54,18 C74,16 82,23 104,14 C124,5 138,8 160,2" stroke="url(#sl)" stroke-width="1.8" stroke-linecap="round"/>
+        <circle cx="160" cy="2" r="3" fill="#E64980"/>
+        <circle cx="160" cy="2" r="7" fill="none" stroke="rgba(230,73,128,.3)" stroke-width="1.2"/>
+      </svg>
+    </div>
+    <!-- Card E: Churn Rate donut -->
+    <div class="fc fc-e" id="fc-e">
+      <div class="fc-head">
+        <span class="fc-lbl">Churn Rate</span>
+        <span class="delta delta-up" style="margin-top:0">↓ 0.4%</span>
+      </div>
+      <div class="donut-wrap">
+        <svg class="donut-svg" width="52" height="52" viewBox="0 0 36 36">
+          <defs>
+            <linearGradient id="dg" x1="0" y1="0" x2="1" y2="1">
+              <stop offset="0%" stop-color="#34D399"/>
+              <stop offset="100%" stop-color="#15AABF"/>
+            </linearGradient>
+          </defs>
+          <circle class="donut-track" cx="18" cy="18" r="14"/>
+          <circle class="donut-fill"  cx="18" cy="18" r="14"/>
+        </svg>
+        <div class="donut-label">
+          <div class="donut-pct">1.2%</div>
+          <div class="donut-sub">Retention 98.8%</div>
+        </div>
+      </div>
+      <div class="pbar-row" style="margin-top:12px">
+        <span class="pbar-lbl">AI intervention rate</span>
+        <span class="pbar-val" style="color:#A78BFA">62%</span>
+      </div>
+      <div class="pbar">
+        <div class="pbar-fill" style="width:62%;background:linear-gradient(90deg,#7C3AED,#9C36B5);box-shadow:0 0 7px rgba(124,58,237,.5)"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- HORIZON GLOW -->
+  <div class="horizon-glow"></div>
+  <div class="hero-body">
+    <div class="hero-text">
+
+      <div class="hero-badge" id="heroBadge">
+        <span class="badge-dot"></span>
+        Powered by GPT-4o + Claude 3.5 Sonnet
+      </div>
+
+      <h1 class="hero-h1">
+        <div class="h1-line">
+          <span class="h1-word" data-delay="80">Run&nbsp;Your&nbsp;</span><span class="h1-word" data-delay="160">Business</span>
+        </div>
+        <div class="h1-line">
+          <span class="h1-word h1-grad" data-delay="260">Smarter</span>
+        </div>
+        <div class="h1-line">
+          <span class="h1-word" data-delay="360">with&nbsp;</span><span class="h1-word" data-delay="430">AI.</span>
+        </div>
+      </h1>
+
+      <p class="hero-sub" id="heroSub">
+        Automate operations, surface real-time insights, and make confident decisions — from one intelligent platform built for teams that move fast.
+      </p>
+
+      <div class="hero-ctas" id="heroCtas">
+        <div class="cta-magnetic-zone">
+          <a href="#" class="cta-p" id="ctaPrimary">
+            <span class="cta-ring"></span>
+            Start for free
+            <div class="cta-arrow" id="ctaArrow">
+              <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
+                <path d="M2 6h8M6 2l4 4-4 4" stroke="white" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+            </div>
+          </a>
+        </div>
+        <a href="#" class="cta-s" id="ctaSecondary">
+          <div class="play-circle">
+            <svg width="7" height="8" viewBox="0 0 7 8" fill="white"><path d="M0 0l7 4L0 8V0z"/></svg>
+          </div>
+          Watch demo
+        </a>
+      </div>
+
+      <div class="sp" id="spRow">
+        <div class="sp-avs">
+          <div class="sp-av" style="background:linear-gradient(135deg,#4C6EF5,#9C36B5)">AK</div>
+          <div class="sp-av" style="background:linear-gradient(135deg,#9C36B5,#E64980)">MR</div>
+          <div class="sp-av" style="background:linear-gradient(135deg,#15AABF,#4C6EF5)">SL</div>
+          <div class="sp-av" style="background:linear-gradient(135deg,#E64980,#F59E0B)">JP</div>
+          <div class="sp-av" style="background:linear-gradient(135deg,#7C3AED,#15AABF)">+</div>
+        </div>
+        <div class="sp-txt">
+          <div class="sp-stars">★★★★★</div>
+          <div><strong>3,000+</strong> businesses trust AIBMS</div>
+        </div>
+        <div class="sp-div"></div>
+        <div class="sp-txt">No credit card<br/>14-day free trial</div>
+      </div>
+
+      <!-- Live ticker strip -->
+      <div class="ticker-wrap" id="tickerWrap">
+        <div class="ticker-track">
+          <div class="ticker-item"><span class="ti-dot" style="background:#34D399"></span>MRR <span class="ti-val">$84.2K</span></div>
+          <div class="ticker-item"><span class="ti-dot" style="background:#4C6EF5"></span>Pipeline <span class="ti-val">$176K</span></div>
+          <div class="ticker-item"><span class="ti-dot" style="background:#E64980"></span>Churn <span class="ti-val">1.2%</span></div>
+          <div class="ticker-item"><span class="ti-dot" style="background:#9C36B5"></span>AI tasks today <span class="ti-val">98,402</span></div>
+          <div class="ticker-item"><span class="ti-dot" style="background:#15AABF"></span>Uptime <span class="ti-val">99.97%</span></div>
+          <div class="ticker-item"><span class="ti-dot" style="background:#F59E0B"></span>Deals won <span class="ti-val">$48K</span></div>
+          <div class="ticker-item"><span class="ti-dot" style="background:#34D399"></span>Automations <span class="ti-val">12 live</span></div>
+          <!-- duplicate for seamless loop -->
+          <div class="ticker-item"><span class="ti-dot" style="background:#34D399"></span>MRR <span class="ti-val">$84.2K</span></div>
+          <div class="ticker-item"><span class="ti-dot" style="background:#4C6EF5"></span>Pipeline <span class="ti-val">$176K</span></div>
+          <div class="ticker-item"><span class="ti-dot" style="background:#E64980"></span>Churn <span class="ti-val">1.2%</span></div>
+          <div class="ticker-item"><span class="ti-dot" style="background:#9C36B5"></span>AI tasks today <span class="ti-val">98,402</span></div>
+          <div class="ticker-item"><span class="ti-dot" style="background:#15AABF"></span>Uptime <span class="ti-val">99.97%</span></div>
+          <div class="ticker-item"><span class="ti-dot" style="background:#F59E0B"></span>Deals won <span class="ti-val">$48K</span></div>
+          <div class="ticker-item"><span class="ti-dot" style="background:#34D399"></span>Automations <span class="ti-val">12 live</span></div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ─── SCROLL CUE ─── -->
+  <div class="scroll-cue" id="scrollCue">
+    <div class="sc-mouse"><div class="sc-dot"></div></div>
+    <div class="sc-chevs">
+      <div class="sc-ch"></div>
+      <div class="sc-ch"></div>
+      <div class="sc-ch"></div>
+    </div>
+    <span class="sc-lbl">Scroll</span>
+  </div>
+
+</section>
+
+<script>
+/* ═══════════════════════════════════════════════════════════
+   PAGE TRANSITION
+   Overlay fades out on load (reveal), fades back in on any
+   link click before navigating (exit), so every transition
+   feels intentional and cinematic rather than a hard cut.
+═══════════════════════════════════════════════════════════ */
+const pt = document.getElementById('page-transition');
+
+// Fade out on load — tiny rAF delay ensures the browser has painted
+requestAnimationFrame(() => {
+  requestAnimationFrame(() => {
+    pt.classList.add('out');
+  });
+});
+
+// Fade in before any same-page or external link navigation
+document.addEventListener('click', e => {
+  const link = e.target.closest('a[href]');
+  if (!link) return;
+  const href = link.getAttribute('href');
+  // Skip hash-only links (#) — they don't navigate
+  if (!href || href === '#' || href.startsWith('#')) return;
+
+  e.preventDefault();
+  pt.classList.remove('out');
+  pt.classList.add('in');
+  // Navigate after the fade completes (matches the .72s transition)
+  setTimeout(() => { window.location.href = href; }, 750);
+});
+
+/* ═══════════════════════════════════════════════════════════
+   UTILITY
+═══════════════════════════════════════════════════════════ */
+const lerp = (a, b, t) => a + (b - a) * t;
+const clamp = (v, lo, hi) => Math.max(lo, Math.min(hi, v));
+
+/* ═══════════════════════════════════════════════════════════
+   MASTER rAF LOOP
+   Everything animated runs through ONE requestAnimationFrame
+   so all motion is synchronised to the same frame.
+═══════════════════════════════════════════════════════════ */
+const tasks = [];  // { fn } registered by each system
+function addTask(fn) { tasks.push(fn); }
+
+let lastT = 0;
+function masterLoop(t) {
+  const dt = Math.min(t - lastT, 64); // cap delta at 64ms (tab focus switch safety)
+  lastT = t;
+  for (let i = 0; i < tasks.length; i++) tasks[i](t, dt);
+  requestAnimationFrame(masterLoop);
+}
+requestAnimationFrame(masterLoop);
+
+/* ═══════════════════════════════════════════════════════════
+   AURORA BEAM LAYER
+   Slow rotating translucent light shafts — like Northern Lights
+   drawn as wide gradient-filled wedge shapes rotating around
+   a point off the top of the screen.
+═══════════════════════════════════════════════════════════ */
+const auC   = document.getElementById('aurora-canvas');
+const auCtx = auC.getContext('2d');
+let AW, AH;
+
+function resizeAu() { AW = auC.width = auC.offsetWidth; AH = auC.height = auC.offsetHeight; }
+resizeAu();
+window.addEventListener('resize', resizeAu);
+
+// Each beam: angle offset, angular speed, colour, opacity
+const beams = [
+  { a: -0.55, spd: 0.00018, col: [76, 110, 245],  op: .10, w: 0.22 },
+  { a:  0.10, spd: 0.00014, col: [156, 54, 181],  op: .09, w: 0.18 },
+  { a:  0.65, spd: 0.00022, col: [228, 73, 128],  op: .07, w: 0.20 },
+  { a: -0.20, spd: 0.00010, col: [21, 170, 191],  op: .06, w: 0.16 },
+  { a:  0.40, spd: 0.00016, col: [124, 58, 237],  op: .08, w: 0.19 },
+];
+
+addTask((t) => {
+  auCtx.clearRect(0, 0, AW, AH);
+
+  // Origin point above top-centre
+  const ox = AW * 0.5;
+  const oy = -AH * 0.12;
+  const len = AH * 2.4;
+
+  beams.forEach(b => {
+    const angle = b.a + t * b.spd;
+    const halfW  = b.w * 0.5;
+
+    const ax1 = ox + Math.cos(angle - halfW) * len;
+    const ay1 = oy + Math.sin(angle - halfW) * len;
+    const ax2 = ox + Math.cos(angle + halfW) * len;
+    const ay2 = oy + Math.sin(angle + halfW) * len;
+
+    // Gradient fades from origin outward
+    const grad = auCtx.createRadialGradient(ox, oy, 0, ox, oy, len);
+    grad.addColorStop(0,   `rgba(${b.col[0]},${b.col[1]},${b.col[2]},${b.op})`);
+    grad.addColorStop(0.5, `rgba(${b.col[0]},${b.col[1]},${b.col[2]},${b.op * .45})`);
+    grad.addColorStop(1,   `rgba(${b.col[0]},${b.col[1]},${b.col[2]},0)`);
+
+    auCtx.beginPath();
+    auCtx.moveTo(ox, oy);
+    auCtx.lineTo(ax1, ay1);
+    auCtx.lineTo(ax2, ay2);
+    auCtx.closePath();
+    auCtx.fillStyle = grad;
+    auCtx.fill();
+  });
+});
+
+/* ═══════════════════════════════════════════════════════════
+   BACKGROUND MESH GRADIENT
+   Runs every frame — uses additive radial draws with
+   globalCompositeOperation so blending is smooth.
+═══════════════════════════════════════════════════════════ */
+const bgC   = document.getElementById('bg-canvas');
+const bgCtx = bgC.getContext('2d');
+let BW, BH;
+
+function resizeBg() { BW = bgC.width = bgC.offsetWidth; BH = bgC.height = bgC.offsetHeight; }
+resizeBg();
+window.addEventListener('resize', resizeBg);
+
+// Each node has a centre (normalised), radius, colour, and orbital parameters
+const nodes = [
+  { cx:.17, cy:.24, r:.58, hex:'#1a3fa8', ox:.09, oy:.07, fps:.19, fpc:.14, ph:0.0, pc:0.0 },
+  { cx:.74, cy:.16, r:.52, hex:'#5c1a9e', ox:.11, oy:.09, fps:.15, fpc:.12, ph:1.3, pc:0.8 },
+  { cx:.44, cy:.62, r:.60, hex:'#8b1060', ox:.07, oy:.08, fps:.12, fpc:.10, ph:2.2, pc:1.5 },
+  { cx:.14, cy:.78, r:.44, hex:'#0d6070', ox:.10, oy:.06, fps:.21, fpc:.17, ph:3.1, pc:0.5 },
+  { cx:.82, cy:.66, r:.46, hex:'#1a2a8e', ox:.08, oy:.10, fps:.14, fpc:.19, ph:0.6, pc:2.3 },
+  { cx:.58, cy:.35, r:.38, hex:'#701090', ox:.06, oy:.08, fps:.17, fpc:.13, ph:1.8, pc:1.1 },
+];
+
+// Smooth time accumulator — prevents jumps if tab is hidden
+let bgTime = 0;
+let lastBgRaf = 0;
+
+addTask((t) => {
+  bgTime = t * 0.00045;
+
+  bgCtx.clearRect(0, 0, BW, BH);
+  bgCtx.fillStyle = '#02030c';
+  bgCtx.fillRect(0, 0, BW, BH);
+
+  bgCtx.globalCompositeOperation = 'lighter';
+
+  nodes.forEach(n => {
+    const cx = (n.cx + n.ox * Math.sin(bgTime * n.fps + n.ph)) * BW;
+    const cy = (n.cy + n.oy * Math.cos(bgTime * n.fpc + n.pc)) * BH;
+    const r  = n.r * Math.min(BW, BH);
+
+    const g = bgCtx.createRadialGradient(cx, cy, 0, cx, cy, r);
+    g.addColorStop(0,   n.hex + '5a');
+    g.addColorStop(0.5, n.hex + '1e');
+    g.addColorStop(1,   n.hex + '00');
+    bgCtx.fillStyle = g;
+    bgCtx.fillRect(0, 0, BW, BH);
+  });
+
+  bgCtx.globalCompositeOperation = 'source-over';
+});
+
+/* ═══════════════════════════════════════════════════════════
+   PARTICLE FIELD
+   — particles have position + velocity
+   — velocity decays via drag (0.988 per frame)
+   — gentle mouse repulsion within 130px
+   — connections drawn at low opacity
+═══════════════════════════════════════════════════════════ */
+const pC   = document.getElementById('particle-canvas');
+const pCtx = pC.getContext('2d');
+let PW, PH, parts = [];
+let pmx = -9999, pmy = -9999; // start offscreen so no initial burst
+
+function resizePc() { PW = pC.width = pC.offsetWidth; PH = pC.height = pC.offsetHeight; }
+resizePc();
+window.addEventListener('resize', () => { resizePc(); buildParts(); });
+
+const COLS = [
+  [76, 110, 245],
+  [156, 54, 181],
+  [228, 73,  128],
+  [21, 170, 191],
+];
+
+function buildParts() {
+  parts = [];
+  const n = Math.min(Math.floor(PW * PH / 8000), 120); // cap at 120 for perf
+  for (let i = 0; i < n; i++) {
+    const c = COLS[i % COLS.length];
+    parts.push({
+      x:  Math.random() * PW,
+      y:  Math.random() * PH,
+      vx: (Math.random() - .5) * .22,
+      vy: (Math.random() - .5) * .22,
+      r:  Math.random() * 1.2 + .35,
+      a:  Math.random() * .4 + .1,
+      r0: c[0], g0: c[1], b0: c[2],
+    });
+  }
+}
+buildParts();
+
+document.addEventListener('mousemove', e => { pmx = e.clientX; pmy = e.clientY; });
+
+// Large ambient orb-particles near card area (right side) — breathe slowly
+const orbParticles = [
+  { x: .72, y: .30, r: 30, col: [156,54,181], baseA: .065, phase: 0.0,  spd: .55 },
+  { x: .86, y: .52, r: 22, col: [76,110,245], baseA: .055, phase: 1.3,  spd: .48 },
+  { x: .62, y: .70, r: 20, col: [228,73,128], baseA: .045, phase: 2.5,  spd: .68 },
+  { x: .80, y: .80, r: 26, col: [21,170,191], baseA: .050, phase: 0.9,  spd: .42 },
+];
+
+addTask((t) => {
+  pCtx.clearRect(0, 0, PW, PH);
+
+  const T = t * 0.001;
+
+  // Draw slow breathing orb-particles first (below regular particles)
+  orbParticles.forEach(o => {
+    const a = o.baseA * (0.6 + 0.4 * Math.sin(T * o.spd + o.phase));
+    const cx = o.x * PW, cy = o.y * PH;
+    const grad = pCtx.createRadialGradient(cx, cy, 0, cx, cy, o.r);
+    grad.addColorStop(0,   `rgba(${o.col[0]},${o.col[1]},${o.col[2]},${a})`);
+    grad.addColorStop(0.6, `rgba(${o.col[0]},${o.col[1]},${o.col[2]},${a * .3})`);
+    grad.addColorStop(1,   `rgba(${o.col[0]},${o.col[1]},${o.col[2]},0)`);
+    pCtx.beginPath();
+    pCtx.arc(cx, cy, o.r, 0, Math.PI * 2);
+    pCtx.fillStyle = grad;
+    pCtx.fill();
+  });
+
+  const DRAG    = 0.988;
+  const REPEL_R = 130;
+  const REPEL_F = 0.038;
+  const CONN_R  = 100;
+
+  for (let i = 0; i < parts.length; i++) {
+    const p = parts[i];
+
+    // Mouse repulsion — smooth, proportional to proximity
+    const dx = p.x - pmx, dy = p.y - pmy;
+    const d2 = dx * dx + dy * dy;
+    if (d2 < REPEL_R * REPEL_R && d2 > 0.01) {
+      const d   = Math.sqrt(d2);
+      const str = (1 - d / REPEL_R) * REPEL_F;
+      p.vx += (dx / d) * str;
+      p.vy += (dy / d) * str;
+    }
+
+    // Velocity drag
+    p.vx *= DRAG;
+    p.vy *= DRAG;
+
+    // Move
+    p.x += p.vx;
+    p.y += p.vy;
+
+    // Wrap edges with tiny buffer so particles don't vanish mid-screen
+    if (p.x < -4)       p.x = PW + 4;
+    if (p.x > PW + 4)   p.x = -4;
+    if (p.y < -4)       p.y = PH + 4;
+    if (p.y > PH + 4)   p.y = -4;
+
+    // Draw particle
+    pCtx.beginPath();
+    pCtx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+    pCtx.fillStyle = `rgba(${p.r0},${p.g0},${p.b0},${p.a})`;
+    pCtx.fill();
+
+    // Draw connections (only to subsequent particles — avoid double-draw)
+    for (let j = i + 1; j < parts.length; j++) {
+      const q   = parts[j];
+      const cdx = p.x - q.x, cdy = p.y - q.y;
+      const cd  = Math.sqrt(cdx * cdx + cdy * cdy);
+      if (cd < CONN_R) {
+        const alpha = (1 - cd / CONN_R) * 0.065;
+        pCtx.beginPath();
+        pCtx.strokeStyle = `rgba(156,54,181,${alpha})`;
+        pCtx.lineWidth   = 0.7;
+        pCtx.moveTo(p.x, p.y);
+        pCtx.lineTo(q.x, q.y);
+        pCtx.stroke();
+      }
+    }
+  }
+});
+
+/* ═══════════════════════════════════════════════════════════
+   FLOATING CARDS
+   — each card has target + current state (spring physics)
+   — idle float: sine on Y, slight rotation
+   — mouse parallax: each card at different depth
+   — hover tilt: cursor position relative to card → rotateXY
+   — NO marginLeft/marginTop (causes layout reflow)
+   — ONLY transform is mutated
+═══════════════════════════════════════════════════════════ */
+const cardDefs = [
+  { el: document.getElementById('fc-a'), depth: 1.0, floatAmp: 10, floatSpeed: .55, floatOffset: 0.0   },
+  { el: document.getElementById('fc-b'), depth: 1.4, floatAmp:  8, floatSpeed: .42, floatOffset: 1.1   },
+  { el: document.getElementById('fc-c'), depth: 1.8, floatAmp: 12, floatSpeed: .48, floatOffset: 2.3   },
+  { el: document.getElementById('fc-d'), depth: 2.2, floatAmp:  7, floatSpeed: .60, floatOffset: 0.7   },
+  { el: document.getElementById('fc-e'), depth: 1.6, floatAmp:  9, floatSpeed: .38, floatOffset: 1.8   },
+];
+
+// Per-card spring state
+cardDefs.forEach(cd => {
+  cd.tx = 0; cd.ty = 0;          // translate target
+  cd.cx = 0; cd.cy = 0;          // translate current
+  cd.rx = 0; cd.ry = 0;          // tilt current
+  cd.rtx = 0; cd.rty = 0;        // tilt target
+  cd.scale = 1; cd.scaleTgt = 1;
+  cd.hovered = false;
+
+  cd.el.addEventListener('mouseenter', () => {
+    cd.hovered = true;
+    cd.scaleTgt = 1.04;
+  });
+  cd.el.addEventListener('mouseleave', () => {
+    cd.hovered = false;
+    cd.rtx = 0; cd.rty = 0;
+    cd.scaleTgt = 1;
+  });
+  cd.el.addEventListener('mousemove', e => {
+    if (!cd.hovered) return;
+    const r = cd.el.getBoundingClientRect();
+    const nx = (e.clientX - r.left) / r.width  - 0.5;
+    const ny = (e.clientY - r.top)  / r.height - 0.5;
+    cd.rtx = nx * 12;   // rotateY
+    cd.rty = -ny * 10;  // rotateX
+  });
+});
+
+// Normalised mouse position for parallax
+let nmx = 0, nmy = 0;
+document.addEventListener('mousemove', e => {
+  nmx = (e.clientX / window.innerWidth)  - 0.5;
+  nmy = (e.clientY / window.innerHeight) - 0.5;
+});
+
+const CARD_SPRING  = 0.07;  // spring tightness for translate
+const TILT_SPRING  = 0.10;  // spring tightness for tilt
+const SCALE_SPRING = 0.10;
+
+addTask((t) => {
+  const T = t * 0.001;
+
+  cardDefs.forEach(cd => {
+    // Parallax target
+    const par = cd.depth * 18;
+    cd.tx = nmx * par;
+    cd.ty = nmy * par * .65;
+
+    // Spring translate
+    cd.cx = lerp(cd.cx, cd.tx, CARD_SPRING);
+    cd.cy = lerp(cd.cy, cd.ty, CARD_SPRING);
+
+    // Idle float on Y (additive on top of parallax)
+    const floatY = Math.sin(T * cd.floatSpeed + cd.floatOffset) * cd.floatAmp;
+
+    // Spring tilt
+    cd.rx = lerp(cd.rx, cd.rtx, TILT_SPRING);
+    cd.ry = lerp(cd.ry, cd.rty, TILT_SPRING);
+
+    // Spring scale
+    cd.scale = lerp(cd.scale, cd.scaleTgt, SCALE_SPRING);
+
+    // Apply — single transform, GPU-composited
+    cd.el.style.transform =
+      `translate(${cd.cx}px, ${cd.cy + floatY}px) ` +
+      `rotateX(${cd.ry}deg) rotateY(${cd.rx}deg) ` +
+      `scale(${cd.scale})`;
+
+    // Dynamic shadow on tilt
+    if (cd.hovered) {
+      const sx = cd.rx * -.7, sy = cd.ry * -.7;
+      cd.el.style.boxShadow =
+        `0 0 0 1px rgba(255,255,255,.06), ` +
+        `${sx}px ${sy}px 50px rgba(0,0,0,.65), ` +
+        `0 28px 60px rgba(0,0,0,.5), ` +
+        `inset 0 1px 0 rgba(255,255,255,.08), ` +
+        `${-sx*2}px ${-sy*2}px 28px rgba(156,54,181,.14)`;
+    } else {
+      cd.el.style.boxShadow = '';
+    }
+  });
+});
+
+/* ═══════════════════════════════════════════════════════════
+   PRIMARY CTA — spring lift + arrow spring
+═══════════════════════════════════════════════════════════ */
+const ctaEl    = document.getElementById('ctaPrimary');
+const arrowEl  = document.getElementById('ctaArrow');
+let ctaY = 0, ctaYT = 0, ctaSc = 1, ctaScT = 1;
+let arrowX = 0, arrowXT = 0;
+
+ctaEl.addEventListener('mouseenter', () => { ctaYT = -4; ctaScT = 1.025; arrowXT = 5; });
+ctaEl.addEventListener('mouseleave', () => { ctaYT = 0;  ctaScT = 1;     arrowXT = 0; });
+ctaEl.addEventListener('mousedown',  () => { ctaYT = -1; ctaScT = .98; });
+ctaEl.addEventListener('mouseup',    () => { ctaYT = -4; ctaScT = 1.025; });
+
+addTask(() => {
+  ctaY  = lerp(ctaY,  ctaYT,  0.12);
+  ctaSc = lerp(ctaSc, ctaScT, 0.12);
+  arrowX = lerp(arrowX, arrowXT, 0.12);
+  ctaEl.style.transform   = `translateY(${ctaY}px) scale(${ctaSc})`;
+  arrowEl.style.transform = `translateX(${arrowX}px)`;
+});
+
+// Ripple on click
+ctaEl.addEventListener('mousedown', function(e) {
+  const r = this.getBoundingClientRect();
+  const sp = document.createElement('span');
+  const size = 5;
+  sp.style.cssText = `
+    position:absolute;border-radius:50%;pointer-events:none;z-index:20;
+    width:${size}px;height:${size}px;
+    left:${e.clientX - r.left}px;top:${e.clientY - r.top}px;
+    background:rgba(255,255,255,.22);
+    transform:translate(-50%,-50%) scale(0);
+    animation:rpl .7s cubic-bezier(.22,1,.36,1) forwards;
+  `;
+  this.appendChild(sp);
+  setTimeout(() => sp.remove(), 750);
+});
+
+/* ═══════════════════════════════════════════════════════════
+   NAV PILL SLIDER INDICATOR
+   — measures pill DOM rects, slides a bg div with transform
+═══════════════════════════════════════════════════════════ */
+const modeBg    = document.getElementById('navModeBg');
+const pills     = document.querySelectorAll('.nav-pill');
+const modeWrap  = document.getElementById('navMode');
+let   pilIdx    = 0;
+
+function movePillBg(idx) {
+  const pill  = pills[idx];
+  const wRect = modeWrap.getBoundingClientRect();
+  const pRect = pill.getBoundingClientRect();
+  modeBg.style.width     = pRect.width  + 'px';
+  modeBg.style.height    = pRect.height + 'px';
+  modeBg.style.transform = `translateX(${pRect.left - wRect.left}px)`;
+}
+
+pills.forEach((p, i) => {
+  p.addEventListener('click', () => {
+    pills.forEach(x => x.classList.remove('active'));
+    p.classList.add('active');
+    pilIdx = i;
+    movePillBg(i);
+  });
+});
+
+// Init bg position after layout
+setTimeout(() => movePillBg(pilIdx), 60);
+
+/* ═══════════════════════════════════════════════════════════
+   ENTRANCE SEQUENCE
+   Uses precise timeouts to trigger CSS transitions in order.
+   Each element uses CSS transitions (not JS spring) for entrance
+   because they only happen once and transitions are cleaner.
+═══════════════════════════════════════════════════════════ */
+function sequence(steps) {
+  steps.forEach(([delay, fn]) => setTimeout(fn, delay));
+}
+
+sequence([
+  [  80, () => document.getElementById('nav').classList.add('visible') ],
+  [ 260, () => document.getElementById('heroBadge').classList.add('revealed') ],
+  [ 400, () => {
+    document.querySelectorAll('.h1-word').forEach(w => {
+      const delay = parseInt(w.dataset.delay || 0);
+      setTimeout(() => w.classList.add('revealed'), delay);
+    });
+  }],
+  [ 940, () => document.getElementById('heroSub').classList.add('revealed') ],
+  [1100, () => document.getElementById('heroCtas').classList.add('revealed') ],
+  [1280, () => document.getElementById('spRow').classList.add('revealed') ],
+  [1480, () => document.getElementById('tickerWrap').classList.add('revealed') ],
+  [1600, () => document.getElementById('scrollCue').classList.add('visible') ],
+  [ 600, () => document.getElementById('fc-a').classList.add('visible') ],
+  [ 760, () => document.getElementById('fc-b').classList.add('visible') ],
+  [ 920, () => document.getElementById('fc-c').classList.add('visible') ],
+  [1060, () => document.getElementById('fc-d').classList.add('visible') ],
+  [ 840, () => document.getElementById('fc-e').classList.add('visible') ],
+]);
+
+/* ═══════════════════════════════════════════════════════════
+   RIPPLE KEYFRAME (injected once)
+═══════════════════════════════════════════════════════════ */
+document.head.insertAdjacentHTML('beforeend',
+  `<style>
+    @keyframes rpl { to { transform:translate(-50%,-50%) scale(90); opacity:0; } }
+    /* Perspective on card layer for 3D tilt */
+    .f-cards-layer { perspective: 900px; }
+    .fc { transform-style: preserve-3d; }
+  </style>`
+);
+
+/* ═══════════════════════════════════════════════════════════
+   NAV CTA spring (same pattern as primary)
+═══════════════════════════════════════════════════════════ */
+const navCta = document.querySelector('.nav-cta');
+let ncY = 0, ncYT = 0;
+navCta.addEventListener('mouseenter', () => ncYT = -2);
+navCta.addEventListener('mouseleave', () => ncYT = 0);
+addTask(() => {
+  ncY = lerp(ncY, ncYT, 0.13);
+  navCta.style.transform = `translateY(${ncY}px)`;
+});
+
+/* ═══════════════════════════════════════════════════════════
+   BAR HOVER — pointer-events on the card hover layer
+═══════════════════════════════════════════════════════════ */
+document.querySelectorAll('.bars-wrap').forEach(wrap => {
+  wrap.style.pointerEvents = 'auto';
+});
+
+/* ═══════════════════════════════════════════════════════════
+   MAGNETIC CTA
+   Cursor gravitates toward the primary button within a radius.
+   The button also moves subtly toward the cursor (magnetism).
+═══════════════════════════════════════════════════════════ */
+const magnetZone = document.querySelector('.cta-magnetic-zone');
+const MAG_RADIUS = 110;
+let magTx = 0, magTy = 0, magCx = 0, magCy = 0;
+let isMagActive = false;
+
+document.addEventListener('mousemove', e => {
+  if (!magnetZone) return;
+  const r  = magnetZone.getBoundingClientRect();
+  const bx = r.left + r.width  * 0.5;
+  const by = r.top  + r.height * 0.5;
+  const dx = e.clientX - bx;
+  const dy = e.clientY - by;
+  const dist = Math.sqrt(dx * dx + dy * dy);
+
+  if (dist < MAG_RADIUS) {
+    isMagActive = true;
+    const pull = (1 - dist / MAG_RADIUS);
+    magTx = dx * pull * 0.28;
+    magTy = dy * pull * 0.28;
+  } else {
+    isMagActive = false;
+    magTx = 0; magTy = 0;
+  }
+});
+
+addTask(() => {
+  magCx = lerp(magCx, magTx, 0.10);
+  magCy = lerp(magCy, magTy, 0.10);
+  if (magnetZone) {
+    magnetZone.style.transform = `translate(${magCx}px, ${magCy}px)`;
+  }
+});
+
+/* ═══════════════════════════════════════════════════════════
+   COUNT-UP — card values animate from 0 on first visibility
+═══════════════════════════════════════════════════════════ */
+function animateCountUp(el, target, prefix, suffix, decimals, duration) {
+  const start = performance.now();
+  function frame(now) {
+    const p  = Math.min((now - start) / duration, 1);
+    // easeOutExpo
+    const ep = p === 1 ? 1 : 1 - Math.pow(2, -10 * p);
+    const v  = target * ep;
+    el.textContent = prefix + (decimals ? v.toFixed(decimals) : Math.round(v).toLocaleString()) + suffix;
+    if (p < 1) requestAnimationFrame(frame);
+    else el.textContent = prefix + (decimals ? target.toFixed(decimals) : target.toLocaleString()) + suffix;
+  }
+  requestAnimationFrame(frame);
+}
+
+// Define which elements to count up and their targets
+const countTargets = [
+  { selector: '#fc-a .fc-val',             prefix: '$', val: 2.41,  suffix: 'M', dec: 2, dur: 1400 },
+  { selector: '#fc-d .fc-val',             prefix: '',  val: 98402, suffix: '',  dec: 0, dur: 1600 },
+];
+
+let countsStarted = false;
+function tryStartCounts() {
+  if (countsStarted) return;
+  countsStarted = true;
+  setTimeout(() => {
+    countTargets.forEach(ct => {
+      const el = document.querySelector(ct.selector);
+      if (el) animateCountUp(el, ct.val, ct.prefix, ct.suffix, ct.dec, ct.dur);
+    });
+  }, 700);
+}
+// Trigger when cards become visible
+setTimeout(tryStartCounts, 800);
+
+/* ═══════════════════════════════════════════════════════════
+   TEXT SCRAMBLE — headline "AI." scrambles in on reveal
+   Uses a character-cycling effect before settling
+═══════════════════════════════════════════════════════════ */
+const CHARS = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789@#$%';
+function scramble(el, finalText, duration) {
+  const totalFrames = Math.round(duration / 16);
+  let frame = 0;
+  const interval = setInterval(() => {
+    frame++;
+    const progress = frame / totalFrames;
+    const settledChars = Math.floor(progress * finalText.length);
+    let display = '';
+    for (let i = 0; i < finalText.length; i++) {
+      if (finalText[i] === ' ') { display += ' '; continue; }
+      if (i < settledChars) {
+        display += finalText[i];
+      } else {
+        display += CHARS[Math.floor(Math.random() * CHARS.length)];
+      }
+    }
+    el.textContent = display;
+    if (frame >= totalFrames) {
+      clearInterval(interval);
+      el.textContent = finalText;
+    }
+  }, 16);
+}
+
+// Scramble the last word "AI." after it reveals
+setTimeout(() => {
+  const aiWord = document.querySelector('.h1-word[data-delay="430"]');
+  if (aiWord) scramble(aiWord, 'AI.', 600);
+}, 430 + 400 + 720); // delay + reveal-delay + transition-time
+
+/* ═══════════════════════════════════════════════════════════
+   SECONDARY CTA spring (same pattern as primary)
+═══════════════════════════════════════════════════════════ */
+const ctaS = document.getElementById('ctaSecondary');
+let csY = 0, csYT = 0;
+if (ctaS) {
+  ctaS.addEventListener('mouseenter', () => csYT = -3);
+  ctaS.addEventListener('mouseleave', () => csYT = 0);
+  addTask(() => {
+    csY = lerp(csY, csYT, 0.12);
+    ctaS.style.transform = `translateY(${csY}px)`;
+  });
+}
+
+/* ═══════════════════════════════════════════════════════════
+   CARD GLOW ON HOVER — border color lift via JS
+   (complements the CSS transition defined on .fc)
+═══════════════════════════════════════════════════════════ */
+const glowColors = {
+  'fc-a': 'rgba(76,110,245,.35)',
+  'fc-b': 'rgba(156,54,181,.35)',
+  'fc-c': 'rgba(228,73,128,.32)',
+  'fc-d': 'rgba(21,170,191,.32)',
+  'fc-e': 'rgba(52,211,153,.35)',
+};
+Object.entries(glowColors).forEach(([id, color]) => {
+  const el = document.getElementById(id);
+  if (!el) return;
+  el.addEventListener('mouseenter', () => {
+    el.style.borderColor = color;
+    el.style.boxShadow = `0 0 0 1px rgba(255,255,255,.06), 0 32px 70px rgba(0,0,0,.6), 0 0 40px ${color}, inset 0 1px 0 rgba(255,255,255,.08)`;
+  });
+  el.addEventListener('mouseleave', () => {
+    el.style.borderColor = '';
+    el.style.boxShadow   = '';
+  });
+});
+</script>
+</body>
+</html>

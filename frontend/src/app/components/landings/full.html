@@ -1,0 +1,58 @@
+import { useEffect } from "react";
+import "./flow.css";
+
+const Flow = () => {
+
+  useEffect(() => {
+    const tracks = document.querySelectorAll(".flow-track");
+
+    tracks.forEach(track => {
+      let pos = 0;
+      const speed = parseFloat(track.dataset.speed || 0.2);
+      const dir = parseInt(track.dataset.dir || -1);
+
+      const animate = () => {
+        pos += speed * dir;
+        track.style.transform = `translateX(${pos}px)`;
+        requestAnimationFrame(animate);
+      };
+
+      animate();
+    });
+  }, []);
+
+  return (
+    <section className="flow-section">
+
+      <div className="flow-bg"></div>
+
+      <div className="flow-header">
+        <h2 className="flow-title">
+          Built for every layer of your business
+        </h2>
+      </div>
+
+      <div className="flow-lanes">
+
+        <div className="flow-lane">
+          <div className="flow-track" data-dir="-1" data-speed="0.2">
+
+            <div className="fc c-blue">
+              <div className="fc-icon">⚡</div>
+              <div>
+                <div className="fc-name">Workflow Automation</div>
+                <div className="fc-desc">
+                  300+ integrations, zero-code
+                </div>
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+      </div>
+    </section>
+  );
+};
+
+export default Flow;

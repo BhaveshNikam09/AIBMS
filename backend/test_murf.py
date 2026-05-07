@@ -1,6 +1,6 @@
 import requests
-
-api_key = "ap2_5e914c44-8bdd-4a63-81c5-484babf71a86"
+import os 
+api_key = os.getenv("MURF_API_KEY")
 
 url = "https://api.murf.ai/v1/speech/voices"
 headers = {

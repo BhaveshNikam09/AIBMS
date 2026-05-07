@@ -962,7 +962,6 @@ nav.visible { opacity: 1; transform: translateY(0); }
 
     <ul class="nav-links">
       <li><a href="#" data-scroll="features">Product Features</a></li>
-      <li><a href="#" data-scroll="impact">Our Impact</a></li>
       <li><a href="#" data-scroll="contact">Contact Us</a></li>
     </ul>
 
@@ -5368,7 +5367,7 @@ a{text-decoration:none;color:inherit}
 .c5{bottom:15%;left:3%;  --d:1.65s;--bd:2.9s}
 
 /* ═══════════════════════════════════════════════════════════════
-   § 8  FOOTER
+   § 8  FOOTER (COMPACT & MODERN)
 ═══════════════════════════════════════════════════════════════ */
 .footer{
   position:relative;
@@ -5381,269 +5380,76 @@ a{text-decoration:none;color:inherit}
   position:absolute;top:0;left:0;right:0;height:1px;z-index:2;
   background:linear-gradient(90deg,
     transparent 0%,
-    rgba(76,110,245,.38)  17%,
-    rgba(147,51,234,.58)  40%,
-    rgba(236,72,153,.58)  60%,
-    rgba(76,110,245,.38)  83%,
+    rgba(147,51,234,.4) 40%,
+    rgba(236,72,153,.4) 60%,
     transparent 100%);
 }
-.ft-div::after{
-  content:'';position:absolute;top:0;left:15%;right:15%;height:72px;
-  background:linear-gradient(to bottom,rgba(147,51,234,.1) 0%,transparent 100%);
-  pointer-events:none;
-}
 
-/* Footer ambient bg */
 .ft-bg{
   position:absolute;inset:0;z-index:0;pointer-events:none;
   background:
-    radial-gradient(ellipse 55% 60% at 2%  80%,rgba(76,110,245,.06) 0%,transparent 55%),
-    radial-gradient(ellipse 45% 50% at 98% 20%,rgba(236,72,153,.05) 0%,transparent 55%),
-    radial-gradient(ellipse 40% 45% at 50% 110%,rgba(147,51,234,.07) 0%,transparent 50%);
-}
-.ft-grid{
-  position:absolute;inset:0;z-index:1;pointer-events:none;
-  background-image:
-    linear-gradient(rgba(255,255,255,.016) 1px,transparent 1px),
-    linear-gradient(90deg,rgba(255,255,255,.016) 1px,transparent 1px);
-  background-size:var(--grid-px) var(--grid-px);
-  mask-image:radial-gradient(ellipse 100% 100% at 50% 0%,black 0%,transparent 85%);
-}
-.ft-noise{
-  position:absolute;inset:0;z-index:1;pointer-events:none;opacity:.022;
-  background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
-  background-size:180px 180px;
+    radial-gradient(ellipse 50% 50% at 50% 120%,rgba(147,51,234,.08) 0%,transparent 70%);
 }
 
-/* Footer inner layout */
 .ft-inner{
   position:relative;z-index:3;
   max-width:var(--max-w);margin:0 auto;
-  padding:68px var(--pad-x) 0;
+  padding:60px var(--pad-x) 40px;
 }
 
-/* 4-col grid */
-.ft-cols{
-  display:grid;
-  grid-template-columns:1.6fr 1fr 1fr 1fr;
-  gap:36px 48px;
-  padding-bottom:52px;
-  border-bottom:1px solid rgba(255,255,255,.065);
+.ft-main{
+  display:flex;justify-content:space-between;align-items:flex-start;
+  gap:40px;padding-bottom:48px;flex-wrap:wrap;
 }
 
-/* Brand column */
-.ft-brand{display:flex;flex-direction:column}
-
-.logo-wrap{
-  display:flex;align-items:center;gap:10px;
-  margin-bottom:var(--sp-6);
-}
+.ft-info{max-width:340px}
+.logo-wrap{display:flex;align-items:center;gap:10px;margin-bottom:16px}
 .logo-icon{
-  width:38px;height:38px;border-radius:10px;
+  width:36px;height:36px;border-radius:10px;
   background:var(--g-brand);
   display:flex;align-items:center;justify-content:center;
-  flex-shrink:0;
-  box-shadow:0 0 22px rgba(124,58,237,.42),0 4px 12px rgba(0,0,0,.36);
-  position:relative;overflow:hidden;
+  box-shadow:0 0 20px rgba(124,58,237,.3);
 }
-.logo-icon::before{
-  content:'';position:absolute;inset:0;
-  background:radial-gradient(ellipse at 30% 25%,rgba(255,255,255,.24) 0%,transparent 60%);
-}
-.logo-icon svg{position:relative;z-index:1}
-.logo-name{
-  font-family:var(--f-display);
-  font-size:1.2rem;font-weight:var(--w-bold);letter-spacing:-.03em;color:var(--t0);
-}
-.logo-name span{
-  background:var(--g-text);
-  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
-}
+.logo-name{font-family:var(--f-display);font-size:1.15rem;font-weight:var(--w-bold);color:var(--t0)}
+.logo-name span{background:var(--g-text);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text}
 
 .ft-tagline{
-  font-size:.9rem;font-weight:var(--w-light);
-  color:var(--t2);line-height:1.65;
-  max-width:272px;margin-bottom:var(--sp-12);
+  font-size:.9rem;font-weight:var(--w-light);color:var(--t2);
+  line-height:1.6;margin-bottom:24px;
 }
 
-/* Newsletter */
-.nl-wrap{margin-bottom:var(--sp-12)}
-.nl-lbl{
-  font-family:var(--f-mono);font-size:var(--sz-sm);
-  font-weight:var(--w-med);text-transform:uppercase;letter-spacing:.1em;
-  color:var(--t3);margin-bottom:10px;
-}
-.nl-form{display:flex;gap:var(--sp-2)}
-.nl-input{
-  flex:1;min-width:0;
-  padding:10px 14px;
-  background:var(--bg-surface);
-  border:1px solid rgba(255,255,255,.1);
-  border-radius:var(--r-md);
-  font-family:var(--f-body);font-size:.84rem;color:var(--t0);
-  outline:none;
-  transition:border-color var(--t-med) var(--ease),
-             box-shadow var(--t-med) var(--ease),
-             background var(--t-med);
-}
-.nl-input::placeholder{color:var(--t3)}
-.nl-input:focus{
-  border-color:rgba(147,51,234,.48);
-  background:var(--bg-surface2);
-  box-shadow:0 0 0 3px rgba(147,51,234,.12);
-}
-.nl-btn{
-  padding:10px 16px;
-  background:var(--g-brand);
-  border:none;border-radius:var(--r-md);cursor:pointer;
-  display:flex;align-items:center;justify-content:center;flex-shrink:0;
-  box-shadow:0 0 16px rgba(124,58,237,.32);
-  transition:transform var(--t-fast) var(--ease-spr),
-             box-shadow var(--t-med) var(--ease),
-             filter var(--t-fast);
-}
-.nl-btn:hover{transform:scale(1.06);box-shadow:0 0 26px rgba(124,58,237,.5);filter:brightness(1.1)}
-.nl-btn:active{transform:scale(.98);transition-duration:.1s}
+.ft-contact-mini{display:flex;flex-direction:column;gap:6px}
+.ct-lbl{font-family:var(--f-mono);font-size:.65rem;text-transform:uppercase;color:var(--t3);letter-spacing:.12em}
+.ct-val{font-size:.9rem;color:var(--t1);text-decoration:none;transition:color .2s;font-weight:var(--w-med)}
+.ct-val:hover{color:var(--t0)}
 
-/* Social icons */
-.socials{display:flex;gap:10px}
+.ft-nav-compact{display:flex;gap:60px;flex-wrap:wrap}
+.ft-nav-group{display:flex;flex-direction:column;gap:14px}
+.ft-nav-hd{font-family:var(--f-display);font-size:.75rem;font-weight:var(--w-bold);color:var(--t0);text-transform:uppercase;letter-spacing:.08em}
+.ft-nav-links{list-style:none;display:flex;flex-direction:column;gap:10px}
+.ft-nav-links a{font-size:.88rem;color:var(--t2);transition:color .2s;display:inline-flex;align-items:center;gap:6px}
+.ft-nav-links a:hover{color:var(--t0)}
+
+.socials{display:flex;gap:12px}
 .soc{
-  width:38px;height:38px;
-  background:var(--bg-surface);
-  border:1px solid rgba(255,255,255,.1);
-  border-radius:var(--r-sm);
-  display:flex;align-items:center;justify-content:center;
-  color:var(--t2);
-  transition:
-    transform  var(--t-fast) var(--ease-spr),
-    color      var(--t-med) var(--ease),
-    background var(--t-med) var(--ease),
-    border-color var(--t-med) var(--ease),
-    box-shadow var(--t-med) var(--ease);
+  width:36px;height:36px;
+  background:rgba(255,255,255,.03);border:1px solid rgba(255,255,255,.08);
+  border-radius:10px;display:flex;align-items:center;justify-content:center;
+  color:var(--t2);transition:all .3s cubic-bezier(.4,0,.2,1);
 }
-.soc:hover{transform:scale(1.12) translateY(-2px);color:var(--t0);border-color:rgba(255,255,255,.2)}
-.soc.tw:hover {background:rgba(29,155,240,.12); box-shadow:0 0 16px rgba(29,155,240,.22)}
-.soc.li:hover {background:rgba(10,102,194,.12); box-shadow:0 0 16px rgba(10,102,194,.22)}
-.soc.gh:hover {background:rgba(255,255,255,.08);box-shadow:0 0 16px rgba(255,255,255,.1)}
-.soc.yt:hover {background:rgba(255,0,0,.1);     box-shadow:0 0 16px rgba(255,0,0,.18)}
-.soc.dis:hover{background:rgba(88,101,242,.12); box-shadow:0 0 16px rgba(88,101,242,.22)}
+.soc:hover{transform:translateY(-3px);color:var(--t0);border-color:rgba(255,255,255,.15);background:rgba(255,255,255,.06);box-shadow:0 6px 16px rgba(0,0,0,.2)}
 
-/* Link columns */
-/* ft-col transitions defined in § 2 SCROLL REVEAL — bidirectional */
-
-.col-hd{
-  font-family:var(--f-display);
-  font-size:.8rem;font-weight:var(--w-semi);
-  letter-spacing:.04em;text-transform:uppercase;color:var(--t0);
-  margin-bottom:18px;padding-bottom:12px;
-  border-bottom:1px solid rgba(255,255,255,.065);
-  position:relative;
-}
-.col-hd::after{
-  content:'';position:absolute;bottom:-1px;left:0;
-  width:26px;height:1.5px;
-  background:var(--g-brand);border-radius:2px;
-  box-shadow:0 0 7px rgba(147,51,234,.48);
-}
-
-.col-links{list-style:none;display:flex;flex-direction:column;gap:2px}
-.col-links li a{
-  display:inline-flex;align-items:center;gap:7px;
-  padding:5px 0;
-  font-size:.87rem;font-weight:var(--w-light);color:var(--t2);
-  position:relative;
-  transition:color var(--t-med) var(--ease),gap var(--t-fast) var(--ease);
-}
-.col-links li a::after{
-  content:'';position:absolute;bottom:3px;left:0;
-  width:0;height:1px;background:var(--g-brand);border-radius:1px;
-  transition:width var(--t-med) var(--ease);
-}
-.col-links li a:hover{color:var(--t1);gap:10px}
-.col-links li a:hover::after{width:100%}
-
-.lk-badge{
-  font-family:var(--f-mono);font-size:.54rem;font-weight:700;
-  letter-spacing:.08em;text-transform:uppercase;
-  padding:2px 6px;border-radius:var(--r-full);line-height:1;flex-shrink:0;
-}
-.b-new {background:rgba(147,51,234,.16);color:#c084fc;border:1px solid rgba(147,51,234,.28)}
-.b-beta{background:rgba(6,182,212,.12); color:#67e8f9;border:1px solid rgba(6,182,212,.24)}
-.b-hot {background:rgba(236,72,153,.12);color:#f9a8d4;border:1px solid rgba(236,72,153,.24)}
-
-.lk-arr{
-  opacity:0;transform:translateX(-4px);
-  transition:opacity var(--t-med) var(--ease),
-             transform var(--t-med) var(--ease-spr);
-  flex-shrink:0;
-}
-.col-links li a:hover .lk-arr{opacity:1;transform:none}
-
-/* Status strip */
-.ft-status{
-  display:flex;align-items:center;justify-content:space-between;
-  flex-wrap:wrap;gap:16px;
-  padding:18px 0;
-  border-bottom:1px solid rgba(255,255,255,.065);
-}
-.st-items{display:flex;align-items:center;gap:var(--sp-12);flex-wrap:wrap}
-.st-item{display:flex;align-items:center;gap:var(--sp-2)}
-.st-dot{
-  width:7px;height:7px;border-radius:50%;flex-shrink:0;position:relative;
-  background:#34D399;box-shadow:0 0 7px rgba(52,211,153,.68);
-}
-.st-dot::before{
-  content:'';position:absolute;inset:-3px;border-radius:50%;
-  background:rgba(52,211,153,.24);
-  animation:st-ping 2.5s ease-in-out infinite;
-}
-@keyframes st-ping{0%,100%{transform:scale(1);opacity:.8}50%{transform:scale(2);opacity:0}}
-.st-txt{font-family:var(--f-mono);font-size:var(--sz-sm);font-weight:var(--w-med);color:var(--t3);letter-spacing:.04em}
-.st-val{color:#34D399}
-.st-certs{display:flex;align-items:center;gap:10px}
-.cert{
-  display:flex;align-items:center;gap:6px;
-  padding:4px 10px;
-  background:rgba(255,255,255,.04);
-  border:1px solid rgba(255,255,255,.085);
-  border-radius:var(--r-sm);
-  font-family:var(--f-mono);font-size:.58rem;font-weight:700;
-  color:var(--t3);letter-spacing:.08em;text-transform:uppercase;
-  transition:border-color var(--t-med) var(--ease),
-             color var(--t-med) var(--ease),
-             box-shadow var(--t-med) var(--ease);
-}
-.cert:hover{border-color:rgba(147,51,234,.34);color:var(--t2);box-shadow:0 0 12px rgba(147,51,234,.09)}
-.cert svg{opacity:.55;flex-shrink:0}
-
-/* Bottom bar — animation handled by § 2 bidirectional reveal */
 .ft-btm{
   display:flex;align-items:center;justify-content:space-between;
-  flex-wrap:wrap;gap:16px;
-  padding:20px 0 26px;
+  padding-top:28px;border-top:1px solid rgba(255,255,255,.06);
+  flex-wrap:wrap;gap:20px;
 }
-.copy{
-  font-family:var(--f-mono);font-size:var(--sz-sm);color:var(--t3);letter-spacing:.04em;
-}
-.copy span{
-  background:var(--g-brand);
-  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
-  font-weight:700;
-}
-.legal{display:flex;align-items:center;gap:18px;flex-wrap:wrap}
-.legal a{
-  font-family:var(--f-mono);font-size:var(--sz-sm);color:var(--t3);letter-spacing:.04em;
-  position:relative;
-  transition:color var(--t-med) var(--ease);
-}
-.legal a::after{
-  content:'';position:absolute;bottom:-1px;left:0;
-  width:0;height:1px;background:var(--g-brand);
-  transition:width var(--t-med) var(--ease);
-}
+.copy{font-family:var(--f-mono);font-size:.78rem;color:var(--t3);letter-spacing:.02em}
+.copy span{color:var(--t1);font-weight:700}
+.legal{display:flex;gap:20px;align-items:center}
+.legal a{font-family:var(--f-mono);font-size:.78rem;color:var(--t3);transition:color .2s}
 .legal a:hover{color:var(--t2)}
-.legal a:hover::after{width:100%}
-.l-sep{width:3px;height:3px;border-radius:50%;background:rgba(255,255,255,.17)}
+.l-sep{width:3px;height:3px;border-radius:50%;background:rgba(255,255,255,.15)}
 .made{
   font-family:var(--f-mono);font-size:var(--sz-sm);color:var(--t3);letter-spacing:.04em;
   display:flex;align-items:center;gap:5px;
@@ -5665,10 +5471,10 @@ a{text-decoration:none;color:inherit}
   .chips{display:none}
   .kpi-grid{grid-template-columns:repeat(2,1fr)}
   .btm-grid{grid-template-columns:1fr 1fr}
-  .ft-cols{grid-template-columns:1fr 1fr 1fr}
-  .ft-brand{grid-column:1/-1}
-  .ft-tagline{max-width:100%}
-  .nl-form{max-width:380px}
+  .ft-main{justify-content:center;text-align:center}
+  .ft-info{max-width:100%}
+  .ft-nav-compact{justify-content:center;gap:32px}
+  .ft-btm{justify-content:center;text-align:center}
 }
 @media(max-width:680px){
   :root{--pad-x:20px;--section-y:80px}
@@ -5679,9 +5485,7 @@ a{text-decoration:none;color:inherit}
   .cta-h{font-size:clamp(2.2rem,9vw,3rem)}
   .trust-row{gap:12px}
   .t-sep{display:none}
-  .ft-cols{grid-template-columns:1fr 1fr;gap:28px 20px}
-  .ft-status{flex-direction:column;align-items:flex-start}
-  .ft-btm{flex-direction:column;align-items:flex-start}
+  .ft-nav-compact{gap:24px 40px}
 }
 </style>
 </head>
@@ -5876,17 +5680,13 @@ a{text-decoration:none;color:inherit}
 <footer class="footer">
   <div class="ft-div"></div>
   <div class="ft-bg"></div>
-  <div class="ft-grid"></div>
-  <div class="ft-noise"></div>
-
   <div class="ft-inner">
-    <div class="ft-cols">
-
-      <!-- Brand -->
-      <div class="ft-brand reveal">
+    <div class="ft-main reveal">
+      <!-- Brand & Description -->
+      <div class="ft-info">
         <div class="logo-wrap">
           <div class="logo-icon">
-            <svg width="22" height="22" viewBox="0 0 22 22" fill="none">
+            <svg width="20" height="20" viewBox="0 0 22 22" fill="none">
               <path d="M11 3L19 19H3L11 3Z" fill="none" stroke="white" stroke-width="1.8" stroke-linejoin="round"/>
               <line x1="6.5" y1="13" x2="15.5" y2="13" stroke="white" stroke-width="1.8" stroke-linecap="round"/>
             </svg>
@@ -5894,87 +5694,51 @@ a{text-decoration:none;color:inherit}
           <div class="logo-name">AI<span>BMS</span></div>
         </div>
         <p class="ft-tagline">AI-powered business management for modern enterprises. Automate, analyse, and accelerate — everything in one intelligent layer.</p>
-        <div class="nl-wrap">
-          <div class="nl-lbl">Product updates</div>
-          <div class="nl-form">
-            <input class="nl-input" type="email" placeholder="you@company.com" autocomplete="off"/>
-            <button class="nl-btn" id="nlBtn" aria-label="Subscribe">
-              <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M2 8h12M8 3l5 5-5 5" stroke="white" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>
-            </button>
+        <div class="ft-contact-mini">
+          <span class="ct-lbl">Direct Support</span>
+          <a href="mailto:hello@aibms.com" class="ct-val">hello@aibms.com</a>
+        </div>
+      </div>
+
+      <!-- Compact Navigation & Social -->
+      <div class="ft-nav-compact">
+        <div class="ft-nav-group">
+          <span class="ft-nav-hd">Platform</span>
+          <ul class="ft-nav-links">
+            <li><a href="#">Features</a></li>
+            <li><a href="#">Pricing</a></li>
+            <li><a href="#">Security</a></li>
+          </ul>
+        </div>
+        <div class="ft-nav-group">
+          <span class="ft-nav-hd">Company</span>
+          <ul class="ft-nav-links">
+            <li><a href="#">About Us</a></li>
+            <li><a href="#">Careers</a></li>
+            <li><a href="#">Blog</a></li>
+          </ul>
+        </div>
+        <div class="ft-nav-group">
+          <span class="ft-nav-hd">Social</span>
+          <div class="socials" style="margin-top:2px">
+            <a class="soc tw" href="#" aria-label="Twitter"><svg width="15" height="15" viewBox="0 0 16 16" fill="none"><path d="M2 2.5L14 13.5M14 2.5L2 13.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg></a>
+            <a class="soc li" href="#" aria-label="LinkedIn"><svg width="15" height="15" viewBox="0 0 16 16" fill="none"><rect x="2" y="2" width="4" height="4" rx="1" fill="currentColor"/><path d="M8 8c0-2 1-2 2-2s3 .5 3 3v3H11v-3c0-1-.5-1.5-1.5-1.5S8 8.2 8 9.5V14" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" fill="none"/></svg></a>
+            <a class="soc gh" href="#" aria-label="GitHub"><svg width="15" height="15" viewBox="0 0 16 16" fill="none"><path d="M8 2.5a5.5 5.5 0 0 0-1.7 10.7c.3.1.4-.1.4-.3v-1c-1.5.3-1.9-.7-1.9-.7-.3-.7-.7-.9-.7-.9-.5-.3 0-.3 0-.3.6 0 .9.6.9.6.5.8 1.3.6 1.6.4 0-.4.2-.6.4-.8-1.2-.1-2.5-.6-2.5-2.7 0-.6.2-1.1.6-1.5 0-.1-.2-.7.1-1.5 0 0 .5-.2 1.5.6a5 5 0 0 1 2.8 0c1-.8 1.5-.6 1.5-.6.3.8.1 1.4.1 1.5.4.4.6.9.6 1.5 0 2.1-1.3 2.6-2.5 2.7.2.2.4.6.4 1.2v1.8c0 .2.1.4.4.3A5.5 5.5 0 0 0 8 2.5z" fill="currentColor"/></svg></a>
           </div>
         </div>
-        <div class="socials">
-          <a class="soc tw" href="#" aria-label="Twitter"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M2 2.5L14 13.5M14 2.5L2 13.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg></a>
-          <a class="soc li" href="#" aria-label="LinkedIn"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><rect x="2" y="2" width="4" height="4" rx="1" fill="currentColor" opacity=".7"/><rect x="2" y="8" width="4" height="6" rx="1" fill="currentColor"/><path d="M8 8c0-2 1-2 2-2s3 .5 3 3v3H11v-3c0-1-.5-1.5-1.5-1.5S8 8.2 8 9.5V14" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" fill="none"/><rect x="8" y="8" width="2" height="6" rx="1" fill="currentColor"/></svg></a>
-          <a class="soc gh" href="#" aria-label="GitHub"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M6 12c-2 .6-3.5-.5-4-2m10 2c0-1.5-1-2-1-2v-2.5A2.5 2.5 0 0 0 8.5 5h-1A2.5 2.5 0 0 0 5 7.5V10s-1 .5-1 2m0 0c.5.5 1.5 1 3 1m-2-1c0 0-.5 2 2 2" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" fill="none"/><circle cx="8" cy="3.5" r="1.5" stroke="currentColor" stroke-width="1.4" fill="none"/></svg></a>
-          <a class="soc yt" href="#" aria-label="YouTube"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><rect x="1.5" y="3.5" width="13" height="9" rx="2" stroke="currentColor" stroke-width="1.4" fill="none"/><path d="M6.5 5.5l4 2.5-4 2.5V5.5Z" fill="currentColor"/></svg></a>
-          <a class="soc dis" href="#" aria-label="Discord"><svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M5.5 10s.5 1 2.5 1 2.5-1 2.5-1" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" fill="none"/><circle cx="6" cy="7.5" r="1" fill="currentColor"/><circle cx="10" cy="7.5" r="1" fill="currentColor"/><path d="M5.5 3.5S3 4 2 6s-1 5-1 5 1.5 2 3.5 2l1-1.5M10.5 3.5s2.5.5 3.5 2.5 1 5 1 5-1.5 2-3.5 2l-1-1.5M5.5 3.5C6 3 7 2.5 8 2.5s2 .5 2.5 1" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round" fill="none"/></svg></a>
-        </div>
-      </div>
-
-      <!-- Product -->
-      <div class="ft-col reveal">
-        <div class="col-hd">Product</div>
-        <ul class="col-links">
-          <li><a href="#"><span>Features</span><svg class="lk-arr" width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M2 5h6M5 2l3 3-3 3" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg></a></li>
-          <li><a href="#"><span>Pricing</span><svg class="lk-arr" width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M2 5h6M5 2l3 3-3 3" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg></a></li>
-          <li><a href="#"><span>AI Tools</span><span class="lk-badge b-new">New</span><svg class="lk-arr" width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M2 5h6M5 2l3 3-3 3" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg></a></li>
-          <li><a href="#"><span>Integrations</span><svg class="lk-arr" width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M2 5h6M5 2l3 3-3 3" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg></a></li>
-          <li><a href="#"><span>Voice Agent</span><span class="lk-badge b-beta">Beta</span><svg class="lk-arr" width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M2 5h6M5 2l3 3-3 3" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg></a></li>
-          <li><a href="#"><span>Analytics</span><span class="lk-badge b-hot">Popular</span><svg class="lk-arr" width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M2 5h6M5 2l3 3-3 3" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg></a></li>
-        </ul>
-      </div>
-
-      <!-- Company -->
-      <div class="ft-col reveal">
-        <div class="col-hd">Company</div>
-        <ul class="col-links">
-          <li><a href="#"><span>About</span><svg class="lk-arr" width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M2 5h6M5 2l3 3-3 3" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg></a></li>
-          <li><a href="#"><span>Careers</span><span class="lk-badge b-new">Hiring</span><svg class="lk-arr" width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M2 5h6M5 2l3 3-3 3" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg></a></li>
-          <li><a href="#"><span>Blog</span><svg class="lk-arr" width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M2 5h6M5 2l3 3-3 3" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg></a></li>
-          <li><a href="#"><span>Press</span><svg class="lk-arr" width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M2 5h6M5 2l3 3-3 3" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg></a></li>
-          <li><a href="#"><span>Contact</span><svg class="lk-arr" width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M2 5h6M5 2l3 3-3 3" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg></a></li>
-        </ul>
-      </div>
-
-      <!-- Resources -->
-      <div class="ft-col reveal">
-        <div class="col-hd">Resources</div>
-        <ul class="col-links">
-          <li><a href="#"><span>Documentation</span><svg class="lk-arr" width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M2 5h6M5 2l3 3-3 3" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg></a></li>
-          <li><a href="#"><span>API Reference</span><svg class="lk-arr" width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M2 5h6M5 2l3 3-3 3" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg></a></li>
-          <li><a href="#"><span>Changelog</span><span class="lk-badge b-new">v3.1</span><svg class="lk-arr" width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M2 5h6M5 2l3 3-3 3" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg></a></li>
-          <li><a href="#"><span>Community</span><svg class="lk-arr" width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M2 5h6M5 2l3 3-3 3" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg></a></li>
-          <li><a href="#"><span>Support</span><svg class="lk-arr" width="10" height="10" viewBox="0 0 10 10" fill="none"><path d="M2 5h6M5 2l3 3-3 3" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg></a></li>
-        </ul>
       </div>
     </div>
 
-    <!-- Status strip -->
-    <div class="ft-status reveal">
-      <div class="st-items">
-        <div class="st-item"><div class="st-dot"></div><span class="st-txt">All systems <span class="st-val">operational</span></span></div>
-        <div class="st-item"><div class="st-dot"></div><span class="st-txt">API uptime <span class="st-val">99.98%</span> · 30d</span></div>
-        <div class="st-item"><div class="st-dot"></div><span class="st-txt">Avg response <span class="st-val">&lt;180ms</span></span></div>
-      </div>
-      <div class="st-certs">
-        <div class="cert"><svg width="13" height="13" viewBox="0 0 13 13" fill="none"><path d="M6.5 1L8 4.5H12L9 7l1 4-3.5-2L3 11l1-4L1 4.5h4z" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round"/></svg>SOC2</div>
-        <div class="cert"><svg width="13" height="13" viewBox="0 0 13 13" fill="none"><path d="M6.5 1.5L11 4v4c0 2-1.5 3.5-4.5 4C4 11.5 2 10 2 8V4l4.5-2.5Z" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round"/><path d="M4 7l2 2 3-3" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg>GDPR</div>
-        <div class="cert"><svg width="13" height="13" viewBox="0 0 13 13" fill="none"><rect x="1.5" y="3" width="10" height="7.5" rx="1.5" stroke="currentColor" stroke-width="1.2"/><path d="M4.5 3V2.5a2 2 0 0 1 4 0V3" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/><circle cx="6.5" cy="6.5" r="1" fill="currentColor"/></svg>ISO 27001</div>
-        <div class="cert"><svg width="13" height="13" viewBox="0 0 13 13" fill="none"><path d="M6.5 1L8 4.5H12L9 7l1 4-3.5-2L3 11l1-4L1 4.5h4z" stroke="currentColor" stroke-width="1.2" stroke-linejoin="round"/></svg>G2 Leader</div>
-      </div>
-    </div>
-
-    <!-- Bottom bar -->
+    <!-- Bottom Bar -->
     <div class="ft-btm reveal">
-      <p class="copy">© 2026 <span>AIBMS</span>, Inc. All rights reserved.</p>
+      <p class="copy">© 2026 <span>AIBMS</span>. All rights reserved.</p>
       <div class="legal">
-        <a href="#">Privacy Policy</a><div class="l-sep"></div>
-        <a href="#">Terms of Service</a><div class="l-sep"></div>
-        <a href="#">Cookie Policy</a><div class="l-sep"></div>
-        <a href="#">Security</a>
+        <a href="#">Privacy Policy</a>
+        <div class="l-sep"></div>
+        <a href="#">Terms of Service</a>
+        <div class="l-sep"></div>
+        <a href="#">Status</a>
       </div>
-      <p class="made">Built with <span class="heart">♥</span> in Mumbai</p>
     </div>
   </div>
 </footer>

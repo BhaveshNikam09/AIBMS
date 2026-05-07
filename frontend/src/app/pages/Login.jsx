@@ -4,7 +4,7 @@ import { Eye, EyeOff, ArrowRight, ArrowLeft, Loader2 } from 'lucide-react'
 import { normalizeRole } from '../utils/rbac'
 
 // ─── unchanged from original ──────────────────────────────────────────────────
-const API_BASE = import.meta.env.VITE_API_BASE || 'http://localhost:8000'
+const API_BASE = (import.meta.env.VITE_API_BASE || (import.meta.env.PROD ? 'https://aibms-8mx2.onrender.com' : 'http://localhost:8000'))
 
 // ─── Inject scoped CSS once (no stylesheet file needed) ───────────────────────
 const CSS_ID = 'aibms-login-css'

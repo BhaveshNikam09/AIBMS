@@ -1703,7 +1703,7 @@ function sequence(steps) {
 }
 
 sequence([
-  [  80, () => document.getElementById('nav').classList.add('visible') ],
+  [  80, () => document.getElementById('nav')?.classList.add('visible') ],
   
   [ 400, () => {
     document.querySelectorAll('.h1-word').forEach(w => {
@@ -1711,16 +1711,16 @@ sequence([
       setTimeout(() => w.classList.add('revealed'), delay);
     });
   }],
-  [ 940, () => document.getElementById('heroSub').classList.add('revealed') ],
-  [1100, () => document.getElementById('heroCtas').classList.add('revealed') ],
-  [1280, () => document.getElementById('spRow').classList.add('revealed') ],
-  [1480, () => document.getElementById('tickerWrap').classList.add('revealed') ],
-  [1600, () => document.getElementById('scrollCue').classList.add('visible') ],
-  [ 600, () => document.getElementById('fc-a').classList.add('visible') ],
-  [ 760, () => document.getElementById('fc-b').classList.add('visible') ],
-  [ 920, () => document.getElementById('fc-c').classList.add('visible') ],
-  [1060, () => document.getElementById('fc-d').classList.add('visible') ],
-  [ 840, () => document.getElementById('fc-e').classList.add('visible') ],
+  [ 940, () => document.getElementById('heroSub')?.classList.add('revealed') ],
+  [1100, () => document.getElementById('heroCtas')?.classList.add('revealed') ],
+  [1280, () => document.getElementById('spRow')?.classList.add('revealed') ],
+  [1480, () => document.getElementById('tickerWrap')?.classList.add('revealed') ],
+  [1600, () => document.getElementById('scrollCue')?.classList.add('visible') ],
+  [ 600, () => document.getElementById('fc-a')?.classList.add('visible') ],
+  [ 760, () => document.getElementById('fc-b')?.classList.add('visible') ],
+  [ 920, () => document.getElementById('fc-c')?.classList.add('visible') ],
+  [1060, () => document.getElementById('fc-d')?.classList.add('visible') ],
+  [ 840, () => document.getElementById('fc-e')?.classList.add('visible') ],
 ]);
 
 /* ═══════════════════════════════════════════════════════════

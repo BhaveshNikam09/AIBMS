@@ -6,7 +6,7 @@ import {
   Plus, Trash2, Users,
 } from 'lucide-react'
 
-const API_BASE = import.meta.env.VITE_API_BASE || 'http://localhost:8000'
+const API_BASE = (import.meta.env.VITE_API_BASE || (import.meta.env.PROD ? 'https://aibms-8mx2.onrender.com' : 'http://localhost:8000'))
 
 // ─── Particle Canvas ─────────────────────────────────────────────────────────
 function ParticleCanvas() {

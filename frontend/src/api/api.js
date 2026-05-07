@@ -1,4 +1,4 @@
-const API_BASE = (import.meta.env.VITE_API_BASE || 'http://localhost:8000') + '/api/v1';
+const API_BASE = (import.meta.env.VITE_API_BASE || (import.meta.env.PROD ? 'https://aibms-8mx2.onrender.com' : 'http://localhost:8000')) + '/api/v1';
 
 /* Get stored token */
 const getToken = () => {

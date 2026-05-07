@@ -12,13 +12,16 @@ from decouple import config
 # ─────────────────────────────────────────────
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-ALLOWED_HOSTS = ['*']
+ALLOWED_HOSTS = [
+    '127.0.0.1',
+    'localhost',
+    'aibms-8mx2.onrender.com'
+]
 # ─────────────────────────────────────────────
 # SECURITY
 # ─────────────────────────────────────────────
 SECRET_KEY = config('SECRET_KEY', default='change-me-in-production')
 DEBUG = config('DEBUG', default=True, cast=bool)
-ALLOWED_HOSTS = config('ALLOWED_HOSTS', default='127.0.0.1,localhost').split(',')
 
 GEMINI_API_KEY = config('GEMINI_API_KEY', default='')
 ASSEMBLYAI_API_KEY = config('ASSEMBLYAI_API_KEY', default='')

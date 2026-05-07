@@ -1,0 +1,296 @@
+\documentclass[12pt,a4paper]{report}
+
+% --- Packages ---
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{geometry}
+\geometry{a4paper, margin=1in}
+\usepackage{graphicx}
+\usepackage{hyperref}
+\usepackage{titlesec}
+\usepackage{setspace}
+\usepackage{booktabs}
+\usepackage{float}
+\usepackage{enumitem}
+\usepackage{xcolor}
+\usepackage{listings}
+\usepackage{caption}
+\usepackage{fancyhdr}
+
+% --- Custom Colors ---
+\definecolor{primaryblue}{RGB}{30, 64, 175}
+\definecolor{secondarygrey}{RGB}{75, 85, 99}
+
+% --- Formatting ---
+\onehalfspacing
+\titleformat{\chapter}[display]
+  {\normalfont\huge\bfseries\color{primaryblue}}{\chaptertitlename\ \thechapter}{20pt}{\Huge}
+\titlespacing*{\chapter}{0pt}{-20pt}{40pt}
+
+\hypersetup{
+    colorlinks=true,
+    linkcolor=primaryblue,
+    filecolor=magenta,      
+    urlcolor=primaryblue,
+    pdftitle={AIBMS Project Report},
+}
+
+% --- Header and Footer ---
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[L]{AIBMS: AI-Driven Business Management System}
+\fancyfoot[C]{\thepage}
+
+% --- Document Starts ---
+\begin{document}
+
+% --- Title Page ---
+\begin{titlepage}
+    \begin{center}
+        \vspace*{1cm}
+        
+        \Huge
+        \textbf{AIBMS: AI-Driven Business Management System}
+        
+        \vspace{0.5cm}
+        \LARGE
+        A Next-Generation ERP for Intelligent Business Operations
+        
+        \vspace{1.5cm}
+        
+        \textbf{Project Report}
+        
+        \vspace{0.8cm}
+        
+        \large
+        Submitted in partial fulfillment of the requirements \\
+        for the degree of \\
+        \textbf{Bachelor of Technology / Computer Science}
+        
+        \vspace{1.5cm}
+        
+        \textbf{Prepared By:} \\
+        [Your Name] \\
+        [Your Roll Number]
+        
+        \vfill
+        
+        \textbf{Under the Guidance of:} \\
+        [Internal Guide Name]
+        
+        \vspace{0.8cm}
+        
+        % \includegraphics[width=0.3\textwidth]{college_logo.png} % Uncomment and provide image path
+        
+        \vspace{0.8cm}
+        
+        \Large
+        Department of Computer Engineering \\
+        [Your College Name] \\
+        May 2024
+        
+    \end{center}
+\end{titlepage}
+
+% --- Abstract ---
+\chapter*{Abstract}
+\addcontentsline{toc}{chapter}{Abstract}
+The rapid digitalization of global commerce has necessitated the evolution of traditional Enterprise Resource Planning (ERP) systems into more agile, intelligent, and user-centric platforms. This report presents \textbf{AIBMS (AI-Driven Business Management System)}, a sophisticated web-based application designed to bridge the gap between traditional accounting and modern generative artificial intelligence. 
+
+AIBMS provides a comprehensive suite of tools for multi-branch business management, including an intelligent digital cashbook, an AI-augmented document repository, and a conversational virtual assistant. By leveraging state-of-the-art technologies such as React 18, Django, and Google Gemini, AIBMS automates tedious manual tasks like invoice parsing and transaction logging. The system's unique capability to interpret natural language commands allows business owners to interact with their financial data through voice and text, significantly reducing the barrier to digital adoption. This report details the functional flow, system architecture, and technical implementation of the AIBMS platform.
+
+% --- Table of Contents ---
+\tableofcontents
+
+% --- Introduction ---
+\chapter{Introduction}
+\section{Background}
+In the contemporary business landscape, data is the most valuable asset. However, for many small and medium-sized enterprises (SMEs), managing this data—particularly financial records and legal documentation—remains a manual and error-prone process. Traditional paper-based ledgers or complex, unintuitive software often lead to inefficiencies, data loss, and a lack of real-time insights.
+
+AIBMS was conceived to solve these challenges by introducing "Intelligence" into the daily operations of a business. It is not just a recording tool but an active participant in business management.
+
+\section{Problem Statement}
+Business owners often struggle with:
+\begin{itemize}
+    \item \textbf{Data Fragmentation}: Records scattered across physical registers, spreadsheets, and different branches.
+    \item \textbf{Manual Entry Fatigue}: The time-consuming task of manually entering data from hundreds of invoices and receipts.
+    \item \textbf{Lack of Real-time Analysis}: Difficulty in getting a consolidated view of financial health across multiple locations instantly.
+    \item \textbf{Steep Learning Curve}: Traditional ERPs are often too technical for the average business owner.
+\end{itemize}
+
+\section{Objectives}
+The primary objectives of the AIBMS project are:
+\begin{enumerate}
+    \item To develop a multi-branch business management platform with data isolation.
+    \item To implement a digital cashbook for seamless tracking of receivables and payables.
+    \item To utilize Generative AI for automated extraction of information from financial documents.
+    \item To provide a natural language interface (Chatbot) for hands-free business management.
+    \item To ensure high security and auditability of all business documents.
+\end{enumerate}
+
+\section{Project Scope}
+The scope of this project encompasses the design and development of a full-stack web application. It includes a responsive frontend for users to interact with, a robust backend for processing business logic, and integrations with external AI services for voice, text, and document processing.
+
+% --- Technology Stack ---
+\chapter{Technology Stack}
+\section{Frontend Technologies}
+The frontend of AIBMS is built using a modern JavaScript stack focused on performance and developer experience.
+
+\subsection{React 18 \& Vite}
+React 18 provides the foundation for our user interface, utilizing its component-based architecture for reusability. Vite is used as the build tool, offering significantly faster development cycles compared to traditional bundlers.
+
+\subsection{Tailwind CSS v4}
+For styling, Tailwind CSS is employed to create a "utility-first" design system. This ensures a highly responsive and consistent UI across different screen sizes. Custom animations are handled by \textbf{Framer Motion} to provide a premium feel.
+
+\subsection{Data Visualization}
+\textbf{Recharts} is used for rendering interactive financial charts. It allows business owners to visualize their revenue and expense trends through clean, SVG-based diagrams.
+
+\section{Backend Technologies}
+The backend serves as the core engine, handling data persistence, authentication, and integration.
+
+\subsection{Django \& REST Framework}
+Django, a high-level Python web framework, was chosen for its "batteries-included" philosophy and strong security features. The Django REST Framework (DRF) is used to build the APIs that communicate with the React frontend.
+
+\subsection{PostgreSQL}
+A robust, open-source relational database is used to store all business-critical data. PostgreSQL ensures ACID compliance, which is vital for financial transactions.
+
+\subsection{Celery \& Redis}
+To handle long-running tasks like AI document analysis without blocking the user interface, AIBMS uses Celery. Redis acts as the message broker, queuing tasks for background workers.
+
+\section{AI \& External Services}
+AIBMS integrates several cutting-edge AI services to provide its "intelligent" features.
+
+\subsection{Google Gemini API}
+The \textbf{Gemini-1.5-Flash} model is the brain of the system. It is used for:
+\begin{itemize}
+    \item Understanding user intents in the chatbot.
+    \item Extracting structured data (Vendor, Amount, Date) from images of invoices.
+    \item Providing accounting advice based on the custom knowledge base.
+\end{itemize}
+
+\subsection{Voice Integration (AssemblyAI \& Murf AI)}
+To enable a truly conversational experience:
+\begin{itemize}
+    \item \textbf{AssemblyAI} is used for real-time Speech-to-Text (STT).
+    \item \textbf{Murf AI} provides high-quality, natural-sounding Text-to-Speech (TTS) for the assistant's responses.
+\end{itemize}
+
+% --- Functional Flow & Requirements ---
+\chapter{Functional Flow \& Requirements}
+
+\section{User Interaction Flow}
+The user journey in AIBMS is designed to be as frictionless as possible. The following flow describes the typical interaction:
+
+\begin{enumerate}
+    \item \textbf{Authentication}: Users log in via JWT-secured credentials.
+    \item \textbf{Onboarding}: Users create their business profile and add various branches (Head Office, Retail Outlet, etc.).
+    \item \textbf{Daily Operations}: Users can either manually log transactions in the Cashbook or upload an invoice to the Document module.
+    \item \textbf{AI Interaction}: Alternatively, a user can simply say, "Log 500 debit for electricity bill" to the CA Assistant.
+    \item \textbf{Analytics}: The dashboard automatically updates to reflect the new data across all views.
+\end{enumerate}
+
+\section{Detailed Module Breakdown}
+
+\subsection{Business and Branch Hierarchy}
+The core of AIBMS is the `Business` model, which acts as the top-level container for all data. Each business can have multiple `Branches`.
+\begin{itemize}
+    \item \textbf{Data Isolation}: Every database query is scoped to the `business_id` and `branch_id`. This multi-tenancy ensures data privacy.
+    \item \textbf{Branch Disambiguation}: We implemented a locality-based naming system. If a business has two branches in "Pune", they can be named "Pune - Deccan" and "Pune - Hinjewadi" using the locality field.
+    \item \textbf{Operating Hours}: Each branch stores its schedule as a JSON object, allowing the system to track when a business is "Open" or "Closed" in real-time.
+\end{itemize}
+
+\subsection{The Digital Cashbook Engine}
+The Cashbook is more than just a table; it's a financial engine.
+\begin{itemize}
+    \item \textbf{Transaction Lifecycle}: A transaction starts as "Pending" (e.g., a bill generated) and moves to "Settled" once the payment is confirmed.
+    \item \textbf{Category Management}: Users can define their own categories (e.g., "Logistics", "Marketing") with custom colors.
+    \item \textbf{Aggregations}: The system performs complex background aggregations to calculate daily closing balances. This is done via a Celery task that runs every night at midnight.
+\end{itemize}
+
+\subsection{Document Intelligence Pipeline}
+When a user uploads a document, it triggers a multi-stage pipeline:
+\begin{enumerate}
+    \item \textbf{Storage}: The file is securely uploaded to an AWS S3 bucket.
+    \item \textbf{OCR \& Analysis}: The Gemini AI analyzes the image or PDF. It looks for specific markers like "Invoice Number", "Total Amount", and "GSTIN".
+    \item \textbf{Verification}: The AI returns a JSON object. The frontend displays this to the user for validation.
+    \item \textbf{Integration}: Once verified, the data is pushed to the Cashbook with a reference link back to the original document.
+\end{enumerate}
+
+\subsection{Conversational AI (CA Assistant) Architecture}
+The AI assistant uses a "Chain-of-Thought" prompting technique to handle user requests.
+\begin{itemize}
+    \item \textbf{Intent Classification}: The AI first determines if the user wants to "Read", "Write", or "Query Knowledge".
+    \item \textbf{Entity Extraction}: It extracts entities like Dates, Amounts, and Names.
+    \item \textbf{Action Execution}: For write actions, the system creates a `PendingAction` object. This ensures that no financial data is altered without explicit user confirmation, preventing accidental AI errors.
+    \item \textbf{Knowledge Grounding}: The AI is restricted to answer based on a predefined set of accounting standards, preventing "hallucinations".
+\end{itemize}
+
+% --- System Design ---
+\chapter{System Design}
+\section{Architecture Overview}
+AIBMS follows a decoupled client-server architecture. The frontend is a Single Page Application (SPA) that interacts with a stateless RESTful API.
+
+\section{Database Design}
+The schema is designed for high scalability. Key tables include:
+\begin{itemize}
+    \item \textbf{Users \& Profiles}: Handling authentication and roles.
+    \item \textbf{Business \& Branches}: Storing organizational hierarchy.
+    \item \textbf{Cashbook Transactions}: The core financial ledger.
+    \item \textbf{Documents \& Activity Logs}: Managing file metadata and audit trails.
+\end{itemize}
+
+\section{AI Action Execution Lifecycle}
+When a user gives a command to the AI, the following internal steps occur:
+\begin{enumerate}
+    \item The text is sent to the Gemini AI for intent analysis.
+    \item The AI identifies the action (e.g., \texttt{ADD\_EXPENSE}) and the parameters (Amount, Category).
+    \item The system creates a \textbf{Pending Action} in the database.
+    \item The frontend displays a confirmation modal to the user.
+    \item Upon user approval, the backend executes the financial entry.
+\end{enumerate}
+
+% --- Design Aesthetics & UI/UX ---
+\chapter{Design Aesthetics \& UI/UX}
+\section{Design Philosophy}
+AIBMS is built with a "Premium-First" design philosophy. The goal was to create an interface that feels more like a modern SaaS product and less like traditional accounting software.
+
+\section{Visual Elements}
+\begin{itemize}
+    \item \textbf{Glassmorphism}: Used in the sidebar and modals to create a sense of depth.
+    \item \textbf{Dynamic Dark Mode}: The interface adapts to the user's preference, reducing eye strain during long hours of work.
+    \item \textbf{Micro-animations}: Subtle hover effects and transitions (via Framer Motion) provide immediate feedback to the user.
+\end{itemize}
+
+\section{Responsive Design}
+The application is fully responsive, ensuring that business owners can check their cashflow on a mobile phone while on the move or manage documents on a large desktop monitor.
+
+% --- Implementation & Testing ---
+\chapter{Implementation \& Testing}
+\section{Development Methodology}
+The project followed an \textbf{Agile Development} methodology. Development was divided into two-week sprints, starting with the core Cashbook module and ending with the complex AI integrations.
+
+\section{Testing Strategy}
+\subsection{Unit Testing}
+Individual components and backend utility functions were tested using Pytest (Backend) and Vitest (Frontend). This ensures that the core logic, like interest calculations or balance aggregations, is always accurate.
+
+\subsection{Integration Testing}
+We tested the interaction between the AI services and the local database. For instance, verifying that a parsed invoice correctly populates the database fields.
+
+\subsection{User Acceptance Testing (UAT)}
+The system was presented to a small group of business owners for feedback. Their input led to the refinement of the "Same-City Disambiguation" feature for branches.
+
+% --- Conclusion & Future Scope ---
+\chapter{Conclusion \& Future Scope}
+\section{Conclusion}
+AIBMS successfully demonstrates how generative AI can be integrated into traditional business processes to enhance productivity. By automating data entry and providing a natural language interface, the system empowers business owners to focus on growth rather than paperwork. The use of a robust tech stack (Django/React) ensures that the platform is scalable and secure.
+
+\section{Future Scope}
+While the current version of AIBMS is highly capable, several enhancements are planned:
+\begin{itemize}
+    \item \textbf{Multi-lingual Support}: Expanding the AI's capabilities to understand and respond in regional languages like Hindi and Marathi.
+    \item \textbf{Tally Integration}: Building an export/import bridge with Tally for seamless accounting.
+    \item \textbf{Predictive Analytics}: Using historical cashbook data to predict future cashflow trends and alert users about potential shortfalls.
+    \item \textbf{Mobile App}: Developing native Android and iOS applications for even better accessibility.
+\end{itemize}
+
+\end{document}

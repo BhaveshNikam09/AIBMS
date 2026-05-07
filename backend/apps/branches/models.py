@@ -15,8 +15,8 @@ class Branch(models.Model):
         HEAD_OFFICE  = 'head_office',  'Head Office'
         BRANCH       = 'branch',       'Branch'
         WAREHOUSE    = 'warehouse',    'Warehouse'
-        OUTLET       = 'outlet',       'Outlet'
-        FRANCHISE    = 'franchise',    'Franchise'
+        # OUTLET       = 'outlet',       'Outlet'
+        # FRANCHISE    = 'franchise',    'Franchise'
 
     id       = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     business = models.ForeignKey(Business, on_delete=models.CASCADE, related_name='branches')

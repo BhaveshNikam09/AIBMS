@@ -63,6 +63,7 @@ LOCAL_APPS = [
     'apps.ai_chatbot',
     'apps.dashboard',
     'apps.reports',
+    'corsheaders',
 ]
 
 INSTALLED_APPS = DJANGO_APPS + THIRD_PARTY_APPS + LOCAL_APPS
@@ -72,6 +73,7 @@ INSTALLED_APPS = DJANGO_APPS + THIRD_PARTY_APPS + LOCAL_APPS
 # MIDDLEWARE
 # ─────────────────────────────────────────────
 MIDDLEWARE = [
+    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'corsheaders.middleware.CorsMiddleware',              # Must be high up
     'django.contrib.sessions.middleware.SessionMiddleware',
@@ -83,6 +85,7 @@ MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'whitenoise.middleware.WhiteNoiseMiddleware',
 ]
+CORS_ALLOW_ALL_ORIGINS = True
 
 import dj_database_url
 import os

@@ -527,12 +527,12 @@ function BranchDrawer({ branch, onClose, onEdit, onToggleActive }) {
 
           {/* Actions */}
           <div className="grid grid-cols-2 gap-2 pt-2">
-            <button
+            {/* <button
               onClick={() => { window.location.href = '/dashboard/cashbook' }}
               className={`flex items-center justify-center gap-1.5 py-2.5 bg-slate-900 text-white text-xs font-semibold rounded-xl hover:bg-slate-800 transition-colors ${branch.isHO ? 'col-span-2' : ''}`}
             >
               <BarChart2 size={13} /> View Cashbook
-            </button>
+            </button> */}
             {!branch.isHO && (
               <button
                 onClick={onEdit}
